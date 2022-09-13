@@ -95,11 +95,48 @@ classdef (InferiorClasses = {?sym}) rga
             obj = pseudoscalar(obj);
         end
 
+                function g = grade(obj)
+            %GRADE Number of basis vectors present in factorization
+            nz = find(obj.m ~= 0);
+            g = 0;
+            if any(ismember(nz,[2 3 4 5])), g = 1; end
+            if any(ismember(nz,[6 7 8 9 10 11])), g = 2; end
+            if any(ismember(nz,[12 13 14 15])), g = 3; end
+            if any(ismember(nz,16)), g = 4; end
+        end
+
+        function ag = antigrade(obj)
+            %ANTIGRADE Number of basis vectors absent in factorization
+            ag = 4 - grade(obj);
+        end
+
+        function obj = reverse(obj)
+            %REVERSE
+            obj.m(6:15) = -obj.m(6:15);
+        end
+
+        function obj = antireverse(obj)
+            %ANTIREVERSE
+            obj.m(2:11) = -obj.m(2:11);
+        end
+
+        function obj = rtcompl(obj)
+            %RTCOMPL Right complement
+            obj = reverse(obj);
+            obj.m = flipud(obj.m(:));
+        end
+
+        function obj = ltcompl(obj)
+            %LTCOMPL Left complement
+            obj = antireverse(obj);
+            obj.m = flipud(obj.m(:));
+        end
+
         function obj = plus(a,b)
             %PLUS RGA addition
             % If only one input is a multivector, then this adds the other
             % input to the scalar component of the multivector.
-            obj = ga3;
+            obj = rga;
             arga = isa(a,"rga");
             brga = isa(b,"rga");
             if arga && brga
@@ -125,23 +162,12 @@ classdef (InferiorClasses = {?sym}) rga
             obj = plus(a,-b);
         end
 
-        function obj = mpower(a,b)
-            %MPOWER RGA wedge product
+        function obj = dot(a,b)
+            %DOT RGA dot product
             arga = isa(a,"rga");
             brga = isa(b,"rga");
             if arga && brga
-                obj = a*b - a.*b;
-            else
-                error('Inputs incompatible')
-            end
-        end
-
-        function obj = times(a,b)
-            %TIMES RGA dot product
-            arga = isa(a,"rga");
-            brga = isa(b,"rga");
-            if arga && brga
-                M = blkdiag(eye(8),-eye(8));
+                M = diag([1 1 1 1 0 -1 -1 -1 0 0 0 -1 0 0 0 0]);
                 s = a.m(:)'*M*b.m(:);
                 obj = rga(s*eye(16,1));
             else
@@ -149,8 +175,26 @@ classdef (InferiorClasses = {?sym}) rga
             end
         end
 
-        function obj = mtimes(a,b)
-            %MTIMES RGA wedgedot product
+        function obj = antidot(a,b)
+            %ANTIDOT RGA anti-dot product
+            arga = isa(a,"rga");
+            brga = isa(b,"rga");
+            if arga && brga
+                M = diag(fliplr([1 1 1 1 0 -1 -1 -1 0 0 0 -1 0 0 0 0]));
+                s = a.m(:)'*M*b.m(:);
+                obj = rga(s*flipud(eye(16,1)));
+            else
+                error('Inputs incompatible')
+            end
+        end
+
+        function obj = times(a,b)
+            % Overload .* as dot product
+            obj = dot(a,b);
+        end
+
+        function obj = wedgedot(a,b)
+            %WEDGEDOT RGA wedgedot product
             obj = rga;
             arga = isa(a,"rga");
             brga = isa(b,"rga");
@@ -166,29 +210,41 @@ classdef (InferiorClasses = {?sym}) rga
             end
         end
 
-        function g = grade(obj)
-            %GRADE Number of basis vectors present in factorization
-            nz = find(obj.m ~= 0);
-            g = 0;
-            if any(ismember(nz,[2 3 4 5])), g = 1; end
-            if any(ismember(nz,[6 7 8 9 10 11])), g = 2; end
-            if any(ismember(nz,[12 13 14 15])), g = 3; end
-            if any(ismember(nz,16)), g = 4; end
+        function obj = mtimes(a,b)
+            % Overload * as wedgedot product
+            obj = wedgedot(a,b);
         end
 
-        function ag = antigrade(obj)
-            %ANTIGRADE Number of basis vectors absent in factorization
-            ag = 4 - grade(obj);
+        function obj = wedge(a,b)
+            %WEDGE RGA wedge product
+            obj = rga;
+            arga = isa(a,"rga");
+            brga = isa(b,"rga");
+            if arga && brga
+                [~,A] = wedgedotmat(a);
+                obj.m = A*b.m(:);
+            elseif ~arga
+                obj.m = a .* b.m;
+            elseif ~brga
+                obj.m = b .* a.m;
+            else
+                error('Inputs incompatible')
+            end
         end
 
-        function obj = reverse(obj)
-            %REVERSE
-            obj.m(6:15) = -obj.m(6:16);
+        function obj = mpower(a,b)
+            % Overload ^ as wedge product
+            obj = wedge(a,b);
         end
 
-        function obj = antireverse(obj)
-            %ANTIREVERSE
-            obj.m(2:11) = -obj.m(1:11);
+        function obj = antiwedge(a,b)
+            %ANTIWEDGE Anti-wedge product
+            obj = ltcompl(wedge(rtcompl(a),rtcompl(b)));
+        end
+
+        function obj = antiwedgedot(a,b)
+            %ANTIWEDGEDOT Anti-wedgedot product
+            obj = ltcompl(wedgedot(rtcompl(a),rtcompl(b)));
         end
 
         function dstr = char(obj)
@@ -256,14 +312,28 @@ classdef (InferiorClasses = {?sym}) rga
 
     methods (Static)
         
-        function wedgedottab
-            % WEDGEDOTTAB Display basis element wedgedot table
+        function producttab(prod)
+            % PRODUCTTAB Display basis element product table
+            % Default is wedgedot but inputs can be "wedge", "antiwedge",
+            % "antiwedgedot" as well.
+            arguments
+                prod string = ""
+            end
             a = eye(1,16);
             b = eye(1,16);
             mtab = cell(16,16);
             for i = 1:16
                 for j = 1:16
-                    mtab{i,j} = strtrim(char(rga(a)*rga(b)));
+                    switch prod
+                        case 'wedge'
+                            mtab{i,j} = strtrim(char(wedge(rga(a),rga(b))));
+                        case 'antiwedge'
+                            mtab{i,j} = strtrim(char(antiwedge(rga(a),rga(b))));
+                        case 'antiwedgedot'
+                            mtab{i,j} = strtrim(char(antiwedgedot(rga(a),rga(b))));
+                        otherwise
+                            mtab{i,j} = strtrim(char(wedgedot(rga(a),rga(b))));
+                    end
                     mtab{i,j}(isspace(mtab{i,j})) = [];
                     if isempty(mtab{i,j})
                         mtab{i,j} = ' 0';
@@ -279,31 +349,6 @@ classdef (InferiorClasses = {?sym}) rga
             s = replace(string(mtab),"\n","");
             % have to transpose b/c fprintf runs down the columns:
             fprintf('%6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s\n',s')
-        end
-
-        function wedgetab
-            % WEDGETAB Display basis element wedge table
-            a = eye(1,16);
-            b = eye(1,16);
-            mtab = cell(16,16);
-            for i = 1:16
-                for j = 1:16
-                    mtab{i,j} = strtrim(char(rga(a)^rga(b)));
-                    mtab{i,j}(isspace(mtab{i,j})) = [];
-                    if isempty(mtab{i,j})
-                        mtab{i,j} = '0';
-                    else
-                        if strcmp(mtab{i,j}(1),'1')
-                            mtab{i,j} = ['+',mtab{i,j}];
-                        end
-                        mtab{i,j}(2) = [];
-                    end
-                    b = circshift(b,1);
-                end
-                a = circshift(a,1);
-            end
-            % have to transpose b/c fprintf runs down the columns:
-            fprintf('%6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s\n',string(mtab)')
         end
 
     end

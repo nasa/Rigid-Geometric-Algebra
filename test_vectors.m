@@ -11,3 +11,4 @@ x = rga(randn(16,1));
 y = rga(randn(16,1));
 %[e0, e1, e2, e3, e23, e31, e12, e321] = ga3bases
 [e0,e1,e2,e3,e4,e23,e31,e12,e43,e42,e41,e321,e412,e431,e423,e1234] = rgabases;
+m1 = e0 + e1 + e2 + e3 + 2*e23 + 2*e31 + 2*e12 + e321;
