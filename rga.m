@@ -3,11 +3,12 @@ classdef (InferiorClasses = {?sym}) rga
     %   Geometric Algebra for homogeneous 4D space w/Lengyal's basis elements.
 
     properties
-        m % multivector [e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234]
+        m (1,16) % multivector [e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234]
+        anti = false % set to true for anti
     end
 
     methods
-        function obj = rga(v)
+        function obj = rga(v,anti)
             %RGA Construct a rga object
             %   obj = rga([e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234])
             %   Symbolic inputs ok using above syntax.
@@ -58,6 +59,9 @@ classdef (InferiorClasses = {?sym}) rga
             else
                 obj.m = v;
             end
+            if nargin == 2
+                obj.anti = anti;
+            end
         end
 
         function obj = scalar(obj)
@@ -83,6 +87,7 @@ classdef (InferiorClasses = {?sym}) rga
         function obj = antivector(obj)
             %ANTIVECTOR Return antivector part
             obj = trivector(obj);
+            obj.anti = true;
         end
 
         function obj = pseudoscalar(obj)
@@ -93,10 +98,21 @@ classdef (InferiorClasses = {?sym}) rga
         function obj = antiscalar(obj)
             %ANTISCALAR Return antiscalar part
             obj = pseudoscalar(obj);
+            obj.anti = true;
         end
 
-                function g = grade(obj)
-            %GRADE Number of basis vectors present in factorization
+        function obj = bulk(obj)
+            %BULK Bulk - portion not containing factors of e4
+            obj.m([5 9:11 13:end]) = 0;
+        end
+
+        function obj = weight(obj)
+            %WEIGHT Weight - portion containing factors of e4
+            obj.m([1:4 6:8 12]) = 0;
+        end
+
+        function g = gr(obj)
+            %GR Grade - Number of basis vectors present in factorization
             nz = find(obj.m ~= 0);
             g = 0;
             if any(ismember(nz,[2 3 4 5])), g = 1; end
@@ -105,30 +121,39 @@ classdef (InferiorClasses = {?sym}) rga
             if any(ismember(nz,16)), g = 4; end
         end
 
-        function ag = antigrade(obj)
-            %ANTIGRADE Number of basis vectors absent in factorization
-            ag = 4 - grade(obj);
+        function ag = antigr(obj)
+            %ANTIGR Antigrade - Number of basis vectors absent in factorization
+            ag = 4 - gr(obj);
         end
 
-        function obj = reverse(obj)
-            %REVERSE
+        function obj = rev(obj)
+            %REV Reverse
             obj.m(6:15) = -obj.m(6:15);
         end
 
-        function obj = antireverse(obj)
-            %ANTIREVERSE
+        function obj = antirev(obj)
+            %ANTIREV Anti-reverse
             obj.m(2:11) = -obj.m(2:11);
         end
 
-        function obj = rtcompl(obj)
-            %RTCOMPL Right complement
-            obj = reverse(obj);
+        function obj = not(obj)
+            % Overload ~ for reverse & antireverse
+            if obj.anti
+                obj = antirev(obj);
+            else
+                obj = rev(obj);
+            end
+        end
+
+        function obj = rcomp(obj)
+            %RCOMP Right complement
+            obj = rev(obj);
             obj.m = flipud(obj.m(:));
         end
 
-        function obj = ltcompl(obj)
-            %LTCOMPL Left complement
-            obj = antireverse(obj);
+        function obj = lcomp(obj)
+            %LCOMP Left complement
+            obj = antirev(obj);
             obj.m = flipud(obj.m(:));
         end
 
@@ -190,7 +215,11 @@ classdef (InferiorClasses = {?sym}) rga
 
         function obj = times(a,b)
             % Overload .* as dot product
-            obj = dot(a,b);
+            if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
+                obj = antidot(a,b);
+            else
+                obj = dot(a,b);
+            end
         end
 
         function obj = wedgedot(a,b)
@@ -212,7 +241,11 @@ classdef (InferiorClasses = {?sym}) rga
 
         function obj = mtimes(a,b)
             % Overload * as wedgedot product
-            obj = wedgedot(a,b);
+            if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
+                obj = antiwedgedot(a,b);
+            else
+                obj = wedgedot(a,b);
+            end
         end
 
         function obj = wedge(a,b)
@@ -234,37 +267,157 @@ classdef (InferiorClasses = {?sym}) rga
 
         function obj = mpower(a,b)
             % Overload ^ as wedge product
-            obj = wedge(a,b);
+            if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
+                obj = antiwedge(a,b);
+            else
+                obj = wedge(a,b);
+            end
         end
 
         function obj = antiwedge(a,b)
             %ANTIWEDGE Anti-wedge product
-            obj = ltcompl(wedge(rtcompl(a),rtcompl(b)));
+            obj = lcomp(wedge(rcomp(a),rcomp(b)));
         end
 
         function obj = antiwedgedot(a,b)
             %ANTIWEDGEDOT Anti-wedgedot product
-            obj = ltcompl(wedgedot(rtcompl(a),rtcompl(b)));
+            obj = lcomp(wedgedot(rcomp(a),rcomp(b)));
+        end
+
+        function obj = rint(a,b)
+            %RINT Right interior product
+            obj = antiwedge(a,rcomp(b));
+        end
+
+        function obj = lint(a,b)
+            %LINT Left interior product
+            obj = antiwedge(lcomp(a),b);
+        end
+
+        function obj = antirint(a,b)
+            %ANTIRINT Right interior antiproduct
+            obj = wedge(a,rcomp(b));
+        end
+
+        function obj = antilint(a,b)
+            %ANTILINT Left interior antiproduct
+            obj = wedge(lcomp(a),b);
+        end
+
+        function obj = proj(a,b)
+            %PROJ Project a onto b
+            obj = lint(rint(weight(b),a),b);
+        end
+
+        function obj = antiproj(a,b)
+            %ANTIPROJ Antiproject a onto b
+            obj = antilint(antirint(weight(b),a),b);
+        end
+
+        function obj = commutate(a,b,type)
+            %COMMUTATE Four types:
+            % commutate(a,b,"-^") = [a,b]-^ (default)
+            % commutate(a,b,"+^") = [a,b]+^
+            % commutate(a,b,"-v") = [a,b]-v
+            % commutate(a,b,"+v") = [a,b]+v
+            arguments
+                a rga
+                b rga
+                type string = "-^"
+            end
+            switch type
+                case "-^"
+                    obj = (wedge(a,rev(b)) - wedge(b,rev(a)));
+                case "+^"
+                    obj = (wedge(a,rev(b)) + wedge(b,rev(a)));
+                case "-v"
+                    obj = (antiwedge(a,rev(b)) - antiwedge(b,rev(a)));
+                case "+v"
+                    obj = (antiwedge(a,rev(b)) + antiwedge(b,rev(a)));
+                otherwise
+                    error('type not recognized')
+            end
+            obj.m = obj.m/2;
+        end
+
+        function n = norm(obj,type)
+            %NORM Norm - four types:
+            % bulk norm
+            % weight norm
+            % geometric norm
+            % projected geometric norm
+            arguments
+                obj rga
+                type string = "geom"
+            end
+            switch type
+                case "bulk"
+                    n2 = dot(obj,rev(obj));
+                    n = sqrt(n2.m(1));
+                case "weight"
+                    n2 = antidot(obj,antirev(obj));
+                    n = sqrt(n2.m(end));
+                case "geom"
+                    n = norm(obj,"bulk") + norm(obj,"weight");
+                case "projgeom"
+                    n = norm(obj,"bulk")/norm(obj,"weight");
+                otherwise
+                    error('type not recognized')
+            end
+        end
+
+        function d = dist(a,b)
+            %DIST Euclidean distance between a & b
+            d = norm(commutate(a,b,"-^"),'weight') ...
+                /norm(commutate(a,b,"+v"),'weight');
+        end
+
+        function obj = bulkrc(obj)
+            %BULKRC Bulk right complement
+            obj = wedgedot(rev(obj),rga('e1234'));
+        end
+
+        function obj = bulklc(obj)
+            %BULKLC Bulk left complement
+            obj = wedgedot(antirev(obj),rga('e1234'));
+        end
+
+        function obj = weightrc(obj)
+            %WEIGHTRC Weight right complement
+            obj = antiwedgedot(rga('e0'),rev(obj));
+        end
+
+        function obj = weightlc(obj)
+            %WEIGHTLC Weight left complement
+            obj = antiwedgedot(rga('e0'),antirev(obj));
         end
 
         function dstr = char(obj)
             % CHAR String representation of object
-            e0 = char(['e',8320]);
-            e1 = char(['e',8321]);
-            e2 = char(['e',8322]);
-            e3 = char(['e',8323]);
-            e4 = char(['e',8324]);
-            e23 = char(['e',8322,8323]);
-            e31 = char(['e',8323,8321]);
-            e12 = char(['e',8321,8322]);
-            e43 = char(['e',8324,8323]);
-            e42 = char(['e',8324,8322]);
-            e41 = char(['e',8324,8321]);
-            e321 = char(['e',8323,8322,8321]);
-            e412 = char(['e',8324,8321,8322]);
-            e431 = char(['e',8324,8323,8321]);
-            e423 = char(['e',8324,8322,8323]);
-            e1234 = char(['e',8321,8322,8323,8324]);
+            if obj.anti
+                es = char(949);
+            else
+                es = 'e';
+            end
+            e0 = char([es,8320]);
+            e1 = char([es,8321]);
+            e2 = char([es,8322]);
+            e3 = char([es,8323]);
+            e4 = char([es,8324]);
+            e23 = char([es,8322,8323]);
+            e31 = char([es,8323,8321]);
+            e12 = char([es,8321,8322]);
+            e43 = char([es,8324,8323]);
+            e42 = char([es,8324,8322]);
+            e41 = char([es,8324,8321]);
+            e321 = char([es,8323,8322,8321]);
+            e412 = char([es,8324,8321,8322]);
+            e431 = char([es,8324,8323,8321]);
+            e423 = char([es,8324,8322,8323]);
+            e1234 = char([es,8321,8322,8323,8324]);
+            if obj.anti
+                obj.m = flipud(obj.m(:));
+            end
             e = char(e0,e1,e2,e3,e4,e23,e31,e12,e43,e42,e41,e321,e412,e431,e423,e1234);
             c_ = @(mi) char(strtrim(formattedDisplayText(mi)));
             if isnumeric(obj.m)
@@ -325,6 +478,10 @@ classdef (InferiorClasses = {?sym}) rga
             for i = 1:16
                 for j = 1:16
                     switch prod
+                        case 'rint'
+                            mtab{i,j} = strtrim(char(rint(rga(a),rga(b))));
+                        case 'lint'
+                            mtab{i,j} = strtrim(char(lint(rga(a),rga(b))));
                         case 'wedge'
                             mtab{i,j} = strtrim(char(wedge(rga(a),rga(b))));
                         case 'antiwedge'
@@ -353,7 +510,4 @@ classdef (InferiorClasses = {?sym}) rga
 
     end
 
-    methods (Hidden)
-
-    end
 end
