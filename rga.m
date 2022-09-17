@@ -392,6 +392,20 @@ classdef (InferiorClasses = {?sym}) rga
             obj = antiwedgedot(rga('e0'),antirev(obj));
         end
 
+        function P = screw(M,P)
+            %SCREW Translate & rotate the point P using the motor M
+            [A,B] = productmat(M,'motor');
+            x = P.m(2:5);
+            P = rga([0; (A+B)*x(:); zeros(11,1)]);
+        end
+
+        function P = unscrew(M,P)
+            %UNSCREW Untranslate & unrotate the point P using the motor M
+            [A,B] = productmat(M,'motor');
+            x = P.m(2:5);
+            P = rga([0; (A-B)*x(:); zeros(11,1)]);
+        end
+
         function dstr = char(obj)
             % CHAR String representation of object
             if obj.anti

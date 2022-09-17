@@ -3,8 +3,8 @@ function Q = rgamotor(varargin)
 switch nargin
     case 0
         r = randn(4,1);
-        u = randn(4,1);
-        r = r - (r'*u)/(u'*u)*u;
+        u = randn(3,1);
+        u(4) = -1/r(4)*(dot(r(1:3),u(1:3)));
     case 2 % r and u
         r = varargin{1};
         u = varargin{2};
@@ -27,11 +27,12 @@ switch nargin
 end
 if exist("L","var")
     Q = L*sin(phi) + rga("e1234")*cos(phi) ...
-            + antiwedgedot(d,L)*cos(phi) - d*sin(phi);
+        + antiwedgedot(d*rga("e0"),L)*cos(phi) - d*sin(phi);
 else
+    r = r(:); u = u(:);
     if isnumeric(r) && isnumeric(u) && abs(r'*u) > 10*eps
         error('Bulk & Weight must be perpendicular')
     else
-        Q = rga([r(1); zeros(4,1); r(1:3); u(1:3); zeros(4,1); u(4)]);
+        Q = rga([u(4); zeros(4,1); u(1:3); r([3 2 1]); zeros(4,1); r(4)]);
     end
 end

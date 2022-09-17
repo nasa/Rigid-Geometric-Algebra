@@ -18,5 +18,5 @@ v = v(:); m = m(:);
 if isnumeric(v) && isnumeric(m) && abs(v'*m) > 10*eps
     error('Direction & Moment must be perpendicular')
 else
-    L = rga([zeros(5,1); m; v; zeros(5,1)]);
+    L = rga([zeros(5,1); m; v([3 2 1]); zeros(5,1)]);
 end
