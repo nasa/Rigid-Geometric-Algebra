@@ -3,13 +3,13 @@ classdef (InferiorClasses = {?sym}) rga
     %   Geometric Algebra for homogeneous 4D space w/Lengyal's basis elements.
 
     properties
-        m (1,16) % multivector [e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234]
-        anti = false % set to true for anti
+        m (1,16) % coefficients of [e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234]
+        anti = false % set to true to use anti-basis elements
     end
 
     methods
         function obj = rga(v,anti)
-            %RGA Construct a rga object
+            %RGA Construct rga multivector object
             %   obj = rga([e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234])
             %   Symbolic inputs ok using above syntax.
             %   obj = 'e0' or "e0" etc. also recognized for single elements
@@ -70,12 +70,12 @@ classdef (InferiorClasses = {?sym}) rga
         end
 
         function obj = vector(obj)
-            %SCALAR Return vector part
+            %VECTOR Return vector part
             obj.m([1 6:end]) = 0;
         end
 
         function obj = bivector(obj)
-            %SCALAR Return bivector part
+            %BIVECTOR Return bivector part
             obj.m([1:5 12:end]) = 0;
         end
 
@@ -91,7 +91,7 @@ classdef (InferiorClasses = {?sym}) rga
         end
 
         function obj = pseudoscalar(obj)
-            %SCALAR Return pseudoscalar part
+            %PSEUDOSCALAR Return pseudoscalar part
             obj.m(1:15) = 0;
         end
 
@@ -393,14 +393,14 @@ classdef (InferiorClasses = {?sym}) rga
         end
 
         function P = screw(M,P)
-            %SCREW Translate & rotate the point P using the motor M
+            %SCREW Translate and rotate the point P using the motor M
             [A,B] = productmat(M,'motor');
             x = P.m(2:5);
             P = rga([0; (A+B)*x(:); zeros(11,1)]);
         end
 
         function P = unscrew(M,P)
-            %UNSCREW Untranslate & unrotate the point P using the motor M
+            %UNSCREW Untranslate and unrotate the point P using the motor M
             [A,B] = productmat(M,'motor');
             x = P.m(2:5);
             P = rga([0; (A-B)*x(:); zeros(11,1)]);
