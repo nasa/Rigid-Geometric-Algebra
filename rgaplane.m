@@ -1,13 +1,7 @@
 classdef rgaplane < rga
     %RGAPLANE RGA Plane
     % Subclass of RGA
-
-    properties
-
-    end
-
     methods
-
         function obj = rgaplane(x,y,z,w)
             %RGAPLANE Construct RGA plane from its normal
             switch nargin

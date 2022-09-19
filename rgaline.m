@@ -1,11 +1,6 @@
 classdef rgaline < rga
     %RGALINE RGA Line
     % Subclass of RGA
-
-    properties
-
-    end
-
     methods
         function obj = rgaline(varargin)
             %RGALINE Line specified by direction & moment vectors

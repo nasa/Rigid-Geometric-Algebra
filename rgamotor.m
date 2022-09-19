@@ -1,13 +1,7 @@
 classdef rgamotor < rga
     %RGAMOTOR RGA Motor: Rigid motion operator for rotation & translation
     % Subclass of RGA
-
-    properties
-
-    end
-
     methods
-
         function obj = rgamotor(varargin)
             %RGAMOTOR Construct rigid motion operator for rotation & translation
             switch nargin
@@ -53,6 +47,5 @@ classdef rgamotor < rga
             %UNITIZE Unitize the motor
             obj.m([9:11 16]) = obj.m([9:11 16])/norm(obj.m([9:11 16]));
         end
-    
     end
 end
