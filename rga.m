@@ -382,13 +382,13 @@ classdef (InferiorClasses = {?sym}) rga
             end
             switch type
                 case "-^"
-                    obj = (wedge(a,rev(b)) - wedge(b,rev(a)));
+                    obj = (wedgedot(a,b) - wedgedot(b,a));
                 case "+^"
-                    obj = (wedge(a,rev(b)) + wedge(b,rev(a)));
+                    obj = (wedgedot(a,b) + wedgedot(b,a));
                 case "-v"
-                    obj = (antiwedge(a,rev(b)) - antiwedge(b,rev(a)));
+                    obj = (antiwedgedot(a,b) - antiwedgedot(b,a));
                 case "+v"
-                    obj = (antiwedge(a,rev(b)) + antiwedge(b,rev(a)));
+                    obj = (antiwedgedot(a,b) + antiwedgedot(b,a));
                 otherwise
                     error('type not recognized')
             end
