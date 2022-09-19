@@ -380,15 +380,15 @@ classdef (InferiorClasses = {?sym}) rga
                 b rga
                 type string = "-^"
             end
-            switch type
+            switch type % note that poster omits reverses...
                 case "-^"
-                    obj = (wedgedot(a,b) - wedgedot(b,a));
+                    obj = wedgedot(a,rev(b)) - wedgedot(b,rev(a));
                 case "+^"
-                    obj = (wedgedot(a,b) + wedgedot(b,a));
+                    obj = wedgedot(a,rev(b)) + wedgedot(b,rev(a));
                 case "-v"
-                    obj = (antiwedgedot(a,b) - antiwedgedot(b,a));
+                    obj = antiwedgedot(a,rev(b)) - antiwedgedot(b,rev(a));
                 case "+v"
-                    obj = (antiwedgedot(a,b) + antiwedgedot(b,a));
+                    obj = antiwedgedot(a,rev(b)) + antiwedgedot(b,rev(a));
                 otherwise
                     error('type not recognized')
             end
