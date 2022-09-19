@@ -64,6 +64,15 @@ classdef (InferiorClasses = {?sym}) rga
             end
         end
 
+        function iseq = eq(a,b)
+            %EQ Overload == for rga objects
+            if a.m == b.m
+                iseq = true;
+            else
+                iseq = false;
+            end
+        end
+
         function obj = scalar(obj)
             %SCALAR Return scalar part
             obj.m(2:end) = 0;
