@@ -7,5 +7,5 @@ c = b; c.anti = true;
 x = rga(randn(16,1));
 y = rga(randn(16,1));
 z = y; z.anti = true;
-[e0,e1,e2,e3,e4,e23,e31,e12,e43,e42,e41,e321,e412,e431,e423,e1234] = rgabases;
+[e0,e1,e2,e3,e4,e23,e31,e12,e43,e42,e41,e321,e412,e431,e423,e1234] = rga.bases;
 m1 = e0 + e1 + e2 + e3 + 2*e23 + 2*e31 + 2*e12 + e321;

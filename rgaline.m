@@ -22,7 +22,7 @@ classdef rgaline < rga
                     error('Inputs not compatible')
             end
             v = v(:); m = m(:);
-            if isnumeric(v) && isnumeric(m) && abs(v([3 2 1])'*m) > 10*eps
+            if isnumeric(v) && isnumeric(m) && abs(v'*m) > 10*eps
                 error('Direction & Moment must be perpendicular')
             else
                 obj.m = [zeros(5,1); m; v([3 2 1]); zeros(5,1)];

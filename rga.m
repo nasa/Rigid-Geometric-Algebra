@@ -422,9 +422,20 @@ classdef (InferiorClasses = {?sym}) rga
         end
 
         function d = dist(a,b)
-            %DIST Euclidean distance between a & b
-            d = norm(commutate(a,b,"-^"),'weight') ...
-                /norm(commutate(a,b,"+v"),'weight');
+            %DIST Euclidean distance between a & b, if defn'd.
+            if (isa(a,'rgapoint') && isa(b,'rgapoint')) || ...
+                    (isa(a,'rgapoint') && isa(b,'rgaline')) || ...
+                    (isa(a,'rgaline') && isa(b,'rgapoint'))
+                d = norm(commutate(a,b,"-^"),'weight') ...
+                    /norm(commutate(a,b,"+v"),'weight');
+            elseif isa(a,'rgaline') && isa(b,'rgaline') || ...
+                    (isa(a,'rgapoint') && isa(b,'rgaplane')) || ...
+                    (isa(a,'rgaplane') && isa(b,'rgapoint'))
+                d = norm(commutate(a,b,"+^"),'weight') ...
+                    /norm(commutate(a,b,"-v"),'weight');
+            else
+                error('Euclidean distance not defined for these inputs')
+            end
         end
 
         function obj = bulkrc(obj)
