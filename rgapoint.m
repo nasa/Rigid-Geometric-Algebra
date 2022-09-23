@@ -8,7 +8,12 @@ classdef rgapoint < rga
                 case 0
                     obj.m = [0 randn(1,4) zeros(1,11)];
                 case 1
-                    obj.m = [0 x(:)' zeros(1,11)];
+                    if isa(x,'rga')
+                        v = vector(x);
+                        obj.m = v.m;
+                    else
+                        obj.m = [0 x(:)' zeros(1,11)];
+                    end
                 case 3
                     obj.m = [0 x y z 1 zeros(1,11)];
                 case 4

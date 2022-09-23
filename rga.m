@@ -380,15 +380,23 @@ classdef (InferiorClasses = {?sym}) rga
                 b rga
                 type string = "-^"
             end
-            switch type % note that poster omits reverses...
+            switch type
+                % GDC'21 talk shows reverses on 2nd argument, but poster
+                % and wiki do not.  To get Euclidean distances shown on
+                % poster, must not use reverses.  If they are included, get
+                % Inf and NaN distances.
                 case "-^"
-                    obj = wedgedot(a,rev(b)) - wedgedot(b,rev(a));
+                    obj = wedgedot(a,b) - wedgedot(b,a);
+                    %obj = wedgedot(a,rev(b)) - wedgedot(b,rev(a));
                 case "+^"
-                    obj = wedgedot(a,rev(b)) + wedgedot(b,rev(a));
+                    obj = wedgedot(a,b) + wedgedot(b,a);
+                    %obj = wedgedot(a,rev(b)) + wedgedot(b,rev(a));
                 case "-v"
-                    obj = antiwedgedot(a,rev(b)) - antiwedgedot(b,rev(a));
+                    obj = antiwedgedot(a,b) - antiwedgedot(b,a);
+                    %obj = antiwedgedot(a,rev(b)) - antiwedgedot(b,rev(a));
                 case "+v"
-                    obj = antiwedgedot(a,rev(b)) + antiwedgedot(b,rev(a));
+                    obj = antiwedgedot(a,b) + antiwedgedot(b,a);
+                    %obj = antiwedgedot(a,rev(b)) + antiwedgedot(b,rev(a));
                 otherwise
                     error('type not recognized')
             end
@@ -424,9 +432,13 @@ classdef (InferiorClasses = {?sym}) rga
         function d = dist(a,b)
             %DIST Euclidean distance between a & b, if defn'd.
             if (isa(a,'rgapoint') && isa(b,'rgapoint')) || ...
-                    (isa(a,'rgapoint') && isa(b,'rgaline')) || ...
-                    (isa(a,'rgaline') && isa(b,'rgapoint'))
+                    (isa(a,'rgapoint') && isa(b,'rgaplane')) || ...
+                    (isa(a,'rgaplane') && isa(b,'rgapoint'))
                 d = norm(commutate(a,b,"-^"),'weight') ...
+                    /norm(commutate(a,b,"+v"),'weight');
+            elseif (isa(a,'rgapoint') && isa(b,'rgaline')) || ...
+                    (isa(a,'rgaline') && isa(b,'rgapoint'))
+                d = norm(commutate(a,b,"+^"),'weight') ...
                     /norm(commutate(a,b,"+v"),'weight');
             elseif isa(a,'rgaline') && isa(b,'rgaline') || ...
                     (isa(a,'rgapoint') && isa(b,'rgaplane')) || ...
