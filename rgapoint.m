@@ -27,5 +27,11 @@ classdef rgapoint < rga
             %UNITIZE Unitize the point
             obj.m(5) = 1;
         end
+
+        function h = plot(obj)
+            %PLOT Plot the point at w=1
+            obj = unitize(obj); % not really needed
+            h = plot3(obj.m(2),obj.m(3),obj.m(4),'*');
+        end
     end
 end

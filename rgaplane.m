@@ -28,5 +28,31 @@ classdef rgaplane < rga
             %UNITIZE Unitize the plane
             obj.m(13:15) = obj.m(13:15)/norm(obj.m(13:15));
         end
+
+        function h = plot(obj)
+            %PLOT Plot the plane
+            % use ax + by + cz + d = 0
+            a = obj.m(15); b = obj.m(14); c = obj.m(13); d = -obj.m(12);
+            if c==0 && b==0 % just plot yz plane
+                h = patch(-d/a*[1 1 1 1],[1 1 -1 -1],[1 -1 -1 1],'c','FaceAlpha',0.5);
+            elseif c==0 && a==0 % just plot xz plane
+                h = patch([1 -1 -1 1],-d/b*[1 1 1 1],[1 1 -1 -1],'c','FaceAlpha',0.5);
+            elseif b==0 && a==0 % just plot xy plane
+                h = patch([1 -1 -1 1],[1 1 -1 -1],-d/c*[1 1 1 1],'c','FaceAlpha',0.5);
+            else
+                x = [1 -1 -1 1];
+                y = [1 1 -1 -1];
+                z = -1/c*(a*x + b*y + d);
+                h = patch(x,y,z,'color','#4DBEEE','FaceAlpha',0.5);
+            end
+            v = h.Vertices;
+            c = h.EdgeColor;
+            hold on
+            for i = 1:4
+                j = mod(i,4)+1;
+                quiver3(v(i,1),v(i,2),v(i,3),v(j,1)-v(i,1),v(j,2)-v(i,2),v(j,3)-v(i,3),...
+                    'color',c);
+            end
+        end
     end
 end

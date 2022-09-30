@@ -610,6 +610,19 @@ classdef (InferiorClasses = {?sym}) rga
             fprintf('%6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s %6s\n',s')
         end
 
+        function h = plotaxes
+            %PLOTAXES Create orthogonal axes in plotspace
+            h = axes('Projection','Perspective');%,...
+                %'XLim',[-1 1],'YLim',[-1 1],'ZLim',[-1 1]);
+            axis equal
+            hold on
+            view(37,30)
+            grid on
+            quiver3(-1,0,0,1,0,0,2,'color','#A2142F')
+            quiver3(0,-1,0,0,1,0,2,'color','#77AC30')
+            quiver3(0,0,-1,0,0,1,2,'color','#0072BD')
+        end
+
     end
 
 end

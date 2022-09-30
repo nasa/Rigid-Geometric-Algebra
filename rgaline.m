@@ -4,7 +4,7 @@ classdef rgaline < rga
     methods
         function obj = rgaline(varargin)
             %RGALINE Line specified by direction & moment vectors
-            if isa(varargin{1},'rga')
+            if nargin == 1 && isa(varargin{1},'rga')
                 b = bivector(varargin{1});
                 obj.m = b.m;
             else
@@ -47,6 +47,15 @@ classdef rgaline < rga
         function obj = moment(obj)
             %MOMENT Return moment part
             obj.m([1:5 9:end]) = 0;
+        end
+
+        function h = plot(obj)
+            %PLOT Plot the line
+            % Project origin onto line, then use quiver
+            o = rgapoint(0,0,0);
+            poL = antiwedge(weightlc(obj)^o,obj);
+            h = quiver3(poL.m(2)/poL.m(5),poL.m(3)/poL.m(5),poL.m(4)/poL.m(5),...
+                obj.m(11),obj.m(10),obj.m(9));
         end
     end
 end
