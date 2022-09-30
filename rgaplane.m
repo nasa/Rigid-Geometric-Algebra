@@ -43,7 +43,7 @@ classdef rgaplane < rga
                 x = [1 -1 -1 1];
                 y = [1 1 -1 -1];
                 z = -1/c*(a*x + b*y + d);
-                h = patch(x,y,z,'color','#4DBEEE','FaceAlpha',0.5);
+                h = patch(x,y,z,'c','FaceAlpha',0.5);
             end
             v = h.Vertices;
             c = h.EdgeColor;
