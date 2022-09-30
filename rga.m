@@ -1,4 +1,4 @@
-classdef (InferiorClasses = {?sym}) rga
+classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
     % G(3,0,1)
     %   Geometric Algebra for homogeneous 4D space w/Lengyal's basis elements.
 
@@ -17,7 +17,7 @@ classdef (InferiorClasses = {?sym}) rga
             %   of basis elements using RGA.BASES (but not for symbolic
             %   coefficients - use symbolic array syntax as above).
             if nargin == 0
-                obj.m = zeros(1,16);
+                obj.m = randn(1,16);
             elseif ischar(v) || isstring(v)
                 m = eye(1,16);
                 switch v
@@ -613,7 +613,7 @@ classdef (InferiorClasses = {?sym}) rga
         function h = plotaxes
             %PLOTAXES Create orthogonal axes in plotspace
             h = axes('Projection','Perspective');%,...
-                %'XLim',[-1 1],'YLim',[-1 1],'ZLim',[-1 1]);
+            %'XLim',[-1 1],'YLim',[-1 1],'ZLim',[-1 1]);
             axis equal
             hold on
             view(37,30)
@@ -621,6 +621,92 @@ classdef (InferiorClasses = {?sym}) rga
             quiver3(-1,0,0,1,0,0,2,'color','#A2142F')
             quiver3(0,-1,0,0,1,0,2,'color','#77AC30')
             quiver3(0,0,-1,0,0,1,2,'color','#0072BD')
+        end
+
+    end
+
+    methods (Access = protected)
+
+        function c = dotReference(obj,indexOp)
+            switch indexOp.Name
+                case {'e0','eps1234'}
+                    c = obj.m(1);
+                case {'e1','eps423'}
+                    c = obj.m(2);
+                case {'e2','eps431'}
+                    c = obj.m(3);
+                case {'e3','eps412'}
+                    c = obj.m(4);
+                case {'e4','eps321'}
+                    c = obj.m(5);
+                case {'e23','eps41'}
+                    c = obj.m(6);
+                case {'e31','eps42'}
+                    c = obj.m(7);
+                case {'e12','eps43'}
+                    c = obj.m(8);
+                case {'e43','eps12'}
+                    c = obj.m(9);
+                case {'e42','eps31'}
+                    c = obj.m(10);
+                case {'e41','eps23'}
+                    c = obj.m(11);
+                case {'e321','eps4'}
+                    c = obj.m(12);
+                case {'e412','eps3'}
+                    c = obj.m(13);
+                case {'e431','eps2'}
+                    c = obj.m(14);
+                case {'e423','eps1'}
+                    c = obj.m(15);
+                case {'e1234','eps0'}
+                    c = obj.m(16);
+                otherwise
+                    error('basis not recognized')
+            end
+        end
+
+        function obj = dotAssign(obj,indexOp,c)
+            switch indexOp.Name
+                case {'e0','eps1234'}
+                    obj.m(1) = c;
+                case {'e1','eps423'}
+                    obj.m(2) = c;
+                case {'e2','eps431'}
+                    obj.m(3) = c;
+                case {'e3','eps412'}
+                    obj.m(4) = c;
+                case {'e4','eps321'}
+                    obj.m(5) = c;
+                case {'e23','eps41'}
+                    obj.m(6) = c;
+                case {'e31','eps42'}
+                    obj.m(7) = c;
+                case {'e12','eps43'}
+                    obj.m(8) = c;
+                case {'e43','eps12'}
+                    obj.m(9) = c;
+                case {'e42','eps31'}
+                    obj.m(10) = c;
+                case {'e41','eps23'}
+                    obj.m(11) = c;
+                case {'e321','eps4'}
+                    obj.m(12) = c;
+                case {'e412','eps3'}
+                    obj.m(13) = c;
+                case {'e431','eps2'}
+                    obj.m(14) = c;
+                case {'e423','eps1'}
+                    obj.m(15) = c;
+                case {'e1234','eps0'}
+                    obj.m(16) = c;
+                otherwise
+                    error('basis not recognized')
+            end
+        end
+
+        function n = dotListLength(obj,indexOp,indexContext)
+            n = 1;
         end
 
     end

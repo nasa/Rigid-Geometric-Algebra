@@ -55,4 +55,45 @@ classdef rgaplane < rga
             end
         end
     end
+
+    methods(Access=protected)
+        function obj = dotAssign(obj,indexOp,c)
+            switch indexOp.Name
+                case {'e0','eps1234'}
+                    obj.m(1) = 0; warning('input ignored')
+                case {'e1','eps423'}
+                    obj.m(2) = 0; warning('input ignored')
+                case {'e2','eps431'}
+                    obj.m(3) = 0; warning('input ignored')
+                case {'e3','eps412'}
+                    obj.m(4) = 0; warning('input ignored')
+                case {'e4','eps321'}
+                    obj.m(5) = 0; warning('input ignored')
+                case {'e23','eps41'}
+                    obj.m(6) = 0; warning('input ignored')
+                case {'e31','eps42'}
+                    obj.m(7) = 0; warning('input ignored')
+                case {'e12','eps43'}
+                    obj.m(8) = 0; warning('input ignored')
+                case {'e43','eps12'}
+                    obj.m(9) = 0; warning('input ignored')
+                case {'e42','eps31'}
+                    obj.m(10) = 0; warning('input ignored')
+                case {'e41','eps23'}
+                    obj.m(11) = 0; warning('input ignored')
+                case {'e321','eps4'}
+                    obj.m(12) = c;
+                case {'e412','eps3'}
+                    obj.m(13) = c;
+                case {'e431','eps2'}
+                    obj.m(14) = c;
+                case {'e423','eps1'}
+                    obj.m(15) = c;
+                case {'e1234','eps0'}
+                    obj.m(16) = 0; warning('input ignored')
+                otherwise
+                    error('basis not recognized')
+            end
+        end
+    end
 end
