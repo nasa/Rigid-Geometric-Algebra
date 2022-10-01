@@ -549,11 +549,18 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function disp(obj)
             % DISP Display object on command line
-            dstr = char(obj);
-            if isempty(dstr)
-                fprintf(formattedDisplayText(0))
+            if numel(obj) == 1
+                dstr = char(obj);
+                if isempty(dstr)
+                    fprintf(formattedDisplayText(0))
+                else
+                    fprintf([dstr,'\n'])
+                end
             else
-                fprintf([dstr,'\n'])
+                fprintf(blanks(4))
+                fprintf([repmat('%dx',1,ndims(obj)-1),'%d '],size(obj))
+                fprintf('%s',class(obj))
+                fprintf('\n')
             end
         end
 
