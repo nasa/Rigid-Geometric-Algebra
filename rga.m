@@ -57,13 +57,14 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                     otherwise
                         error('string or char input not recognized')
                 end
+                if contains(v,'eps') && nargin == 1
+                    obj.anti = true;
+                end
             else
                 obj.m = v;
             end
             if nargin == 2
                 obj.anti = anti;
-            elseif contains(v,'eps')
-                obj.anti = true;
             end
         end
 
