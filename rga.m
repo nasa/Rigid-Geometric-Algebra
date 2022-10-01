@@ -12,7 +12,8 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             %RGA Construct rga multivector object
             %   obj = rga([e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234])
             %   Symbolic inputs ok using above syntax.
-            %   obj = 'e0' or "e0" etc. also recognized for single elements
+            %   obj = rga('e0') or rga("e0") etc. also recognized for single elements
+            %   Dual basis input e.g. 'eps0' etc. also works and creates e1234, etc.
             %   To create objects like 5e0 - 3e12 etc. first create a set
             %   of basis elements using RGA.BASES (but not for symbolic
             %   coefficients - use symbolic array syntax as above).
@@ -21,37 +22,37 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             elseif ischar(v) || isstring(v)
                 m = eye(1,16);
                 switch v
-                    case 'e0'
+                    case {'e0','eps1234'}
                         obj.m = m;
-                    case 'e1'
+                    case {'e1','eps423'}
                         obj.m = circshift(m,1);
-                    case 'e2'
+                    case {'e2','eps431'}
                         obj.m = circshift(m,2);
-                    case 'e3'
+                    case {'e3','eps412'}
                         obj.m = circshift(m,3);
-                    case 'e4'
+                    case {'e4','eps321'}
                         obj.m = circshift(m,4);
-                    case 'e23'
+                    case {'e23','eps41'}
                         obj.m = circshift(m,5);
-                    case 'e31'
+                    case {'e31','eps42'}
                         obj.m = circshift(m,6);
-                    case 'e12'
+                    case {'e12','eps43'}
                         obj.m = circshift(m,7);
-                    case 'e43'
+                    case {'e43','eps12'}
                         obj.m = circshift(m,8);
-                    case 'e42'
+                    case {'e42','eps31'}'
                         obj.m = circshift(m,9);
-                    case 'e41'
+                    case {'e41','eps23'}
                         obj.m = circshift(m,10);
-                    case 'e321'
+                    case {'e321','eps4'}
                         obj.m = circshift(m,11);
-                    case 'e412'
+                    case {'e412','eps3'}
                         obj.m = circshift(m,12);
-                    case 'e431'
+                    case {'e431','eps2'}
                         obj.m = circshift(m,13);
-                    case 'e423'
+                    case {'e423','eps1'}
                         obj.m = circshift(m,14);
-                    case 'e1234'
+                    case {'e1234','eps0'}
                         obj.m = circshift(m,15);
                     otherwise
                         error('string or char input not recognized')
@@ -61,6 +62,8 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             end
             if nargin == 2
                 obj.anti = anti;
+            elseif contains(v,'eps')
+                obj.anti = true;
             end
         end
 
