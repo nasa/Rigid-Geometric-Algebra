@@ -474,18 +474,36 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             obj = antiwedgedot(rga('e0'),antirev(obj));
         end
 
-        function P = screw(M,P)
-            %SCREW Translate and rotate the point P using the motor M
-            [A,B] = productmat(M,'motor');
-            x = P.m(2:5);
-            P = rga([0; (A+B)*x(:); zeros(11,1)]);
+        function X = screw(M,X)
+            %SCREW Translate and rotate the object X using the motor M
+            arguments
+                M (1,1) rgamotor
+                X (1,1)
+            end
+            M = unitize(M);
+            if isa(X,'rgapoint')
+                [A,B] = productmat(M,'motor');
+                x = X.m(2:5);
+                X = rga([0; (A+B)*x(:); zeros(11,1)]);
+            else
+                X = antiwedgedot(antiwedgedot(M,X),antirev(M));
+            end
         end
 
-        function P = unscrew(M,P)
-            %UNSCREW Untranslate and unrotate the point P using the motor M
-            [A,B] = productmat(M,'motor');
-            x = P.m(2:5);
-            P = rga([0; (A-B)*x(:); zeros(11,1)]);
+        function X = unscrew(M,X)
+            %UNSCREW Untranslate and unrotate the object X using the motor M
+            arguments
+                M (1,1) rgamotor
+                X (1,1)
+            end
+            M = unitize(M);
+            if isa(X,'rgapoint')
+                [A,B] = productmat(M,'motor');
+                x = X.m(2:5);
+                X = rga([0; (A-B)*x(:); zeros(11,1)]);
+            else
+                X = antiwedgedot(antiwedgedot(antrev(M),X),M);
+            end
         end
 
         function dstr = char(obj)

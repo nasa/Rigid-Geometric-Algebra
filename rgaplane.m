@@ -32,7 +32,7 @@ classdef rgaplane < rga
         function h = plot(obj)
             %PLOT Plot the plane
             % use ax + by + cz + d = 0
-            a = obj.m(15); b = obj.m(14); c = obj.m(13); d = -obj.m(12);
+            a = obj.m(15); b = obj.m(14); c = obj.m(13); d = obj.m(12);
             if c==0 && b==0 % just plot yz plane
                 h = patch(-d/a*[1 1 1 1],[1 1 -1 -1],[1 -1 -1 1],'c','FaceAlpha',0.5);
             elseif c==0 && a==0 % just plot xz plane

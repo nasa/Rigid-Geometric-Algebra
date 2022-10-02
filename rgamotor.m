@@ -22,7 +22,7 @@ classdef rgamotor < rga
                     v = varargin{3};
                     m = varargin{4};
                     L = rgaline(v,m);
-                case 8 % could be r1 r2 r3 r4 u1 u2 u3 u4 or phi d v1 v2 v3 m1 m2 m3
+                case 8 % phi d v1 v2 v3 m1 m2 m3
                     phi = varargin{1};
                     d = varargin{2};
                     v = [varargin{3:5}];
@@ -46,6 +46,8 @@ classdef rgamotor < rga
         function obj = unitize(obj)
             %UNITIZE Unitize the motor
             obj.m([9:11 16]) = obj.m([9:11 16])/norm(obj.m([9:11 16]));
+            %obj.m(1) = -1/obj.m(16)*dot(obj.m([11 10 9]),obj.m(6:8));
+            obj = obj - proj(bulk(obj),weight(obj));
         end
     end
 
