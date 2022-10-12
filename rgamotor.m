@@ -9,6 +9,8 @@ classdef rgamotor < rga
                     r = randn(4,1);
                     u = randn(3,1);
                     u(4) = -1/r(4)*(dot(r(1:3),u(1:3)));
+                case 1 % input is a multivector
+                    obj.m = varargin{1}.m;
                 case 2 % r and u
                     r = varargin{1};
                     u = varargin{2};
@@ -18,22 +20,22 @@ classdef rgamotor < rga
                     L = varargin{3};
                 case 4 % phi, d, v, m
                     phi = varargin{1};
-                    d = varargin{2};
+                    d = varargin{2}*rga("e0");
                     v = varargin{3};
                     m = varargin{4};
                     L = rgaline(v,m);
                 case 8 % phi d v1 v2 v3 m1 m2 m3
                     phi = varargin{1};
-                    d = varargin{2};
+                    d = varargin{2}*rga("e0");
                     v = [varargin{3:5}];
                     m = [varargin{6:8}];
                     L = rgaline(v,m);
             end
             if exist("L","var")
                 Q = L*sin(phi) + rga("e1234")*cos(phi) ...
-                    + antiwedgedot(d*rga("e0"),L)*cos(phi) - d*sin(phi);
+                    + antiwedgedot(d,L)*cos(phi) - d*sin(phi);
                 obj.m = Q.m;
-            else
+            elseif exist("r","var") && exist("u","var")
                 r = r(:); u = u(:);
                 if isnumeric(r) && isnumeric(u) && abs(r'*u) > 10*eps
                     error('Bulk & Weight must be perpendicular')
@@ -48,6 +50,7 @@ classdef rgamotor < rga
             obj.m([9:11 16]) = obj.m([9:11 16])/norm(obj.m([9:11 16]));
             %obj.m(1) = -1/obj.m(16)*dot(obj.m([11 10 9]),obj.m(6:8));
             obj = obj - proj(bulk(obj),weight(obj));
+            obj = rgamotor(obj);
         end
     end
 

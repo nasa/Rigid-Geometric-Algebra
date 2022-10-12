@@ -734,7 +734,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             end
         end
 
-        function n = dotListLength(obj,indexOp,indexContext)
+        function n = dotListLength(obj,indexOp,indexContext) %#ok<INUSD> 
             n = 1;
         end
 
