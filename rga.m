@@ -153,6 +153,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             % Overload ~ for reverse & antireverse
             if obj.anti
                 obj = antirev(obj);
+                obj.anti = true;
             else
                 obj = rev(obj);
             end
@@ -276,6 +277,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             % Overload .* as dot product
             if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
                 obj = antidot(a,b);
+                obj.anti = true;
             else
                 obj = dot(a,b);
             end
@@ -302,6 +304,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             % Overload * as wedgedot product
             if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
                 obj = antiwedgedot(a,b);
+                obj.anti = true;
             else
                 obj = wedgedot(a,b);
             end
@@ -504,6 +507,15 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             else
                 X = antiwedgedot(antiwedgedot(antrev(M),X),M);
             end
+        end
+
+        function obj = zapeps(obj,tol)
+            %ZAPEPS Remove (zap) multivector components less than eps or tol
+            arguments
+                obj
+                tol = 1e-16;
+            end
+            obj.m(abs(obj.m)<tol) = 0;
         end
 
         function dstr = char(obj)
