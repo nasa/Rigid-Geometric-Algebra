@@ -251,6 +251,15 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                         -v4, -b4f', s, t4f', -v3f', p, -b3f', t3;
                         O31, O33, b4, O33, v4*I-skew(t4), O31, p*I-skew(b4), t4;
                         0, O13, -v4, O13, -b4', 0, t4',p]; 
+                case "antiwedge"
+                    A = [p, -t4f', -t3, -b4f',     -b3f', v4,  v3f',     s;
+                        O31, p*I, O31,  -skew(t4f), t3*J,  b4f, weks(b3), v3;
+                        0,   O13, p,    O13,       -t4',  0,   O13,      v4;
+                        O31, O33, O31,  p*I,       O33,   t4f, -t3*J,    b3;
+                        O31, O33, O31,  O33,       p*I,   O31, skew(t4), b4;
+                        0,   O13, 0,  O13,       O13,   p,   O13,      t3;
+                        O31, O33, O31,  O33,       O33,   O31, p*I,      t4;
+                        0,   O13, 0,    O13,       O13,   0,   O13,      p]; 
                 otherwise
                     error('product type not recognized')
             end
