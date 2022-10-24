@@ -242,6 +242,15 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                         O13, 1];
                     B = [2*skew(b4f)*p, 2*(p*b3 - s*b4f);
                         O13, 0];
+                case "antiwedgedot"
+                    A = [p, -t4f', -t3, -b4f', -b3f', v4, v3f', s;
+                        -t4f, p*I+skew(b4f),b3, -v4*I-skew(t4f), t3*J+weks(v3), b4f, s*J+weks(b3), v3;
+                        0, O13, p, O13, -t4', 0, -b4', v4;
+                        b4f, v4*I+skew(t4f),-v3, p*I+skew(b4f), s*J+weks(b3), t4f, -t3*J-weks(v3), b3;
+                        O31, O33, -t4, O33, p*I-skew(b4), O31, -v4*I+skew(t4), b4;
+                        -v4, -b4f', s, t4f', -v3f', p, -b3f', t3;
+                        O31, O33, b4, O33, v4*I-skew(t4), O31, p*I-skew(b4), t4;
+                        0, O13, -v4, O13, -b4', 0, t4',p]; 
                 otherwise
                     error('product type not recognized')
             end
@@ -606,6 +615,19 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             e43 = rga('e43'); e42 = rga('e42'); e41 = rga('e41');
             e321 = rga('e321'); e412 = rga('e412'); e431 = rga('e431'); e423 = rga('e423');
             e1234 = rga('e1234');
+        end
+
+        function [eps0,eps1,eps2,eps3,eps4,eps23,eps31,eps12,eps43,eps42,eps41,eps321,eps412,eps431,eps423,eps1234] = antibases
+            %ANTIBASES Create full set of anti-basis elements for RGA
+            [eps1234,eps423,eps431,eps412,eps321,eps41,eps42,eps43,...
+                eps12,eps31,eps23,eps4,eps3,eps2,eps1,eps0] = rga.bases;
+            eps1234.anti = true;
+            eps423.anti = true; eps431.anti = true; eps412.anti = true;
+            eps321.anti = true; 
+            eps41.anti = true; eps42.anti = true; eps43.anti = true; 
+            eps12.anti = true; eps31.anti = true; eps23.anti = true; 
+            eps4.anti = true; eps3.anti = true; eps2.anti = true; 
+            eps1.anti = true; eps0.anti = true;
         end
 
         function producttab(prod)

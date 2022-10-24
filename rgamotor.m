@@ -49,7 +49,7 @@ classdef rgamotor < rga
             %UNITIZE Unitize the motor
             obj.m([9:11 16]) = obj.m([9:11 16])/norm(obj.m([9:11 16]));
             %obj.m(1) = -1/obj.m(16)*dot(obj.m([11 10 9]),obj.m(6:8));
-            obj = obj - proj(bulk(obj),weight(obj));
+            %obj = obj - proj(bulk(obj),weight(obj));
             obj = rgamotor(obj);
         end
     end
