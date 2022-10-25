@@ -5,6 +5,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
     properties
         m (1,16) % coefficients of [e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234]
         anti = false % set to true to use anti-basis elements
+        dispeps = 1e-15 % threshold for displaying small terms; set to 0 to show all
     end
 
     methods
@@ -577,6 +578,9 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             for i = 1:16
                 mi = obj.m(i);
                 if isequal(mi,z)
+                    continue
+                end
+                if abs(obj.m(i)) <= obj.dispeps
                     continue
                 end
                 if i>1 && s(i)>0
