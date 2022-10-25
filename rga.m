@@ -580,7 +580,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                 if isequal(mi,z)
                     continue
                 end
-                if abs(obj.m(i)) <= obj.dispeps
+                if isnumeric(obj.m(i)) && abs(obj.m(i)) <= obj.dispeps
                     continue
                 end
                 if i>1 && s(i)>0
