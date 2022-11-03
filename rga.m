@@ -244,14 +244,24 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                     B = [2*skew(b4f)*p, 2*(p*b3 - s*b4f);
                         O13, 0];
                 case "antiwedgedot"
-                    A = [p, -t4f', -t3, -b4f', -b3f', v4, v3f', s;
-                        -t4f, p*I+skew(b4f),b3, -v4*I-skew(t4f), t3*J+weks(v3), b4f, s*J+weks(b3), v3;
-                        0, O13, p, O13, -t4', 0, -b4', v4;
-                        b4f, v4*I+skew(t4f),-v3, p*I+skew(b4f), s*J+weks(b3), t4f, -t3*J-weks(v3), b3;
-                        O31, O33, -t4, O33, p*I-skew(b4), O31, -v4*I+skew(t4), b4;
-                        -v4, -b4f', s, t4f', -v3f', p, -b3f', t3;
-                        O31, O33, b4, O33, v4*I-skew(t4), O31, p*I-skew(b4), t4;
-                        0, O13, -v4, O13, -b4', 0, t4',p]; 
+                    A = [p,   -t4f',          -t3, -b4f',           -b3f',           v4,   v3f',          s;
+                        -t4f, p*I+skew(b4f),   b3, -v4*I-skew(t4f),  t3*J+weks(v3),  b4f,  s*J+weks(b3),  v3;
+                        0,    O13,             p,   O13,            -t4',            0,   -b4',           v4;
+                        b4f,  v4*I+skew(t4f), -v3,  p*I+skew(b4f),   s*J+weks(b3),   t4f, -t3*J-weks(v3), b3;
+                        O31,  O33,            -t4,  O33,             p*I-skew(b4),   O31, -v4*I+skew(t4), b4;
+                        -v4,  -b4f',           s,   t4f',           -v3f',           p,   -b3f',          t3;
+                        O31,  O33,             b4,  O33,             v4*I-skew(t4),  O31,  p*I-skew(b4),  t4;
+                        0,    O13,            -v4,  O13,            -b4',            0,    t4',           p]; 
+                    % B is s/t A*B*x is equal to Q*x*~Q 
+                    B = [p,   -t4f',          -t3, b4f',           b3f',           -v4,   -v3f',          s;
+                        t4f, p*I+skew(b4f),   b3, -v4*I-skew(t4f),  t3*J+weks(v3),  -b4f, -s*J-weks(b3),  -v3;
+                        0,    O13,             p,   O13,            -t4',            0,   b4',           -v4;
+                        -b4f,  -v4*I-skew(t4f), v3,  p*I+skew(b4f),   s*J+weks(b3),   t4f, -t3*J-weks(v3), -b3;
+                        O31,  O33,            -t4,  O33,             p*I-skew(b4),   O31, v4*I-skew(t4), -b4;
+                        -v4,  b4f',           -s,   -t4f',           v3f',           p,   -b3f',          t3;
+                        O31,  O33,             -b4,  O33,             -v4*I+skew(t4),  O31,  p*I-skew(b4),  t4;
+                        0,    O13,            v4,  O13,            b4',            0,    t4',           p];
+
                 case "antiwedge"
                     A = [p, -t4f', -t3, -b4f',     -b3f', v4,  v3f',     s;
                         O31, p*I, O31,  -skew(t4f), t3*J,  b4f, weks(b3), v3;
