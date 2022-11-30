@@ -10,10 +10,10 @@ classdef rgamotor < rga
                     u = randn(3,1);
                     u(4) = -1/r(4)*(dot(r(1:3),u(1:3)));
                 case 1 % input is a multivector
-                    obj = varargin{1};
-                    %obj.m = varargin{1}.m;
-                    %obj.anti = varargin{1}.anti;
-                    %obj.dispeps = varargin{1}.dispeps;
+                    %obj = varargin{1}; % doesn't preserve class
+                    obj.m = varargin{1}.m;
+                    obj.anti = varargin{1}.anti;
+                    obj.dispeps = varargin{1}.dispeps;
                 case 2 % r and u
                     r = varargin{1};
                     u = varargin{2};
