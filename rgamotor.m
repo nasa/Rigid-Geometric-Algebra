@@ -58,6 +58,28 @@ classdef rgamotor < rga
             %obj = obj - proj(bulk(obj),weight(obj));
             obj = rgamotor(obj);
         end
+
+        function varargout = extract(obj)
+            %EXTRACT Extract motor parameters from motor
+            % [phi,d,v,m] = extract(obj)
+            % [phi,d,L] = extract(obj)
+            % where the motor rotates through 2*phi and translates through
+            % 2*d along line L defined by direction v and moment m.
+            phi = acos(obj.e1234);
+            sph = sin(phi);
+            d = -(obj.e0/sph);
+            v = [obj.e41 obj.e42 obj.e43]/sph;
+            m = ([obj.e23 obj.e31 obj.e12]- d*v*cos(phi))/sph;
+            varargout{1} = phi;
+            varargout{2} = d;
+            if nargout == 3
+                L = rgaline(v,m);
+                varargout{3} = L;
+            else
+                varargout{3} = v;
+                varargout{4} = m;
+            end
+        end
     end
 
     methods(Access=protected)

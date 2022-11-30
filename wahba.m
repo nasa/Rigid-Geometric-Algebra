@@ -142,6 +142,7 @@ Qtru = rgamotor(R*S);
 %Qtru = unitize(rgamotor); Q.anti = true;
 disp('Qtru = ')
 disp(Qtru)
+[phi,d,v,m] = extract(Qtru)
 n = 10;
 for i = n:-1:1
     phi = 0.1*pi/180*rand;
@@ -171,6 +172,8 @@ Qhat = wahba(M,N);
 Qhat.anti = true;
 disp('Qhat =')
 disp(Qhat)
+[phi,d,v,m] = extract(Qhat)
 disp('Qhat - Q =')
 disp(Qhat - Q)
+[phi,d,v,m] = extract(rgamotor(Qhat - Q))
 end
