@@ -40,7 +40,7 @@ classdef rgamotor < rga
                 obj.m = Q.m;
             elseif exist("r","var") && exist("u","var")
                 r = r(:); u = u(:);
-                if isnumeric(r) && isnumeric(u) && abs(r'*u) > 10*eps
+                if isnumeric(r) && isnumeric(u) && abs(r'*u) > 100*eps
                     error('Bulk & Weight must be perpendicular')
                 else
                     obj.m = [u(4); zeros(4,1); u(1:3); r([3 2 1]); zeros(4,1); r(4)];

@@ -15,14 +15,12 @@ end
 lenM = length(M);
 for i = lenM:-1:1
     if iscell(M)
-        %m(:,i) = M{i}.m'; n(:,i) = N{i}.m';
-        mw(:,i) = weight(M{i}).m'; nw(:,i) = weight(N{i}).m';
-        mb(:,i) = bulk(M{i}).m'; nb(:,i) = bulk(N{i}).m';
+        Mi = M{i}; Ni = N{i};
     else
-        %m(:,i) = M(i).m'; n(:,i) = N(i).m';
-        mw(:,i) = weight(M(i)).m'; nw(:,i) = weight(N(i)).m';
-        mb(:,i) = bulk(M(i)).m'; nb(:,i) = bulk(N(i)).m';
+        Mi = M(i); Ni = N(i);
     end
+    mw(:,i) = weight(Mi).m'; nw(:,i) = weight(Ni).m';
+    mb(:,i) = bulk(Mi).m'; nb(:,i) = bulk(Ni).m';
 end
 
 %% Solve for rotational part of motor
@@ -35,10 +33,15 @@ Ew(16,4) = 1; Ew(11:-1:9,1:3) = eye(3);
 [V,e] = eig(Ew'*C*Ew,'vector');
 V = real(V); e = real(e);
 V(abs(V)<1e4*eps) = 0;
-[~,k] = sort(e,'descend');
-qw = Ew*V(:,k(1));
+if all(all(abs(V-eye(4)) < 1e4*eps))
+    qw(16,1) = 1;
+    warning('Identity rotation found; possibly due to poor observability')
+else
+    [~,k] = sort(e,'descend');
+    qw = Ew*V(:,k(1));
+end
 
-%% Solve for translation part of motor
+%% Solve for remaining part of motor
 U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse
 C = 0;
 d = 0;
@@ -47,12 +50,18 @@ for i = 1:lenM
     d = d + nb(:,i) - Xi(qw)'*Psi(qw)*mb(:,i);
 end
 Eb(16,4) = 0; Eb([1 6:8],:) = eye(4);
-qb = Eb*((Eb'*(C'*C)*Eb)\(Eb'*C'*d));
+%qb = Eb*((Eb'*(C'*C)*Eb)\(Eb'*C'*d));
+qb = Eb*lsqminnorm((Eb'*(C'*C)*Eb),(Eb'*C'*d));
+rnk = rank(Eb'*(C'*C)*Eb);
+if rnk < 4
+    warning(['Translational solution may be inaccurate; rank = ',...
+        num2str(rnk), ' vs. 4 needed'])
+end
 
 %% Enforce constraints and create output motor
 qw = qw/norm(qw);
 qb([1 6:8]) = reject(qb([1 6:8]),qw([16 11 10 9]));
-Q = rgamotor(qw([11 10 9 16]),qb([6:8 1]));
+Q = unitize(rgamotor(qw([11 10 9 16]),qb([6:8 1])));
 end
 
 %% Helper functions
@@ -136,17 +145,15 @@ R = unitize(rgamotor(phi,0,Ltru)); % pure rotation about L
 %R0 = unitize(rgamotor(phi,0,direction(Ltru))); % pure rotation about origin
 S = rgamotor(0,d,Ltru); % pure translation along direction of L
 %S0 = rgamotor(0,d,direction(Ltru)); % shuold be same as S
-R.anti = true; S.anti = true; R0.anti = true; S0.anti = true;
+R.anti = true; S.anti = true; 
+%R0.anti = true; S0.anti = true;
 %Q0 = rgamotor(R0*S0);
 Qtru = rgamotor(R*S);
 %Qtru = unitize(rgamotor); Q.anti = true;
-disp('Qtru = ')
-disp(Qtru)
-[phi,d,v,m] = extract(Qtru)
-n = 10;
+n = 16;
 for i = n:-1:1
-    phi = 0.1*pi/180*rand;
-    d = 0.1*randn;
+    phi = pi/4*randn;
+    d = 3*randn;
     dR = unitize(rgamotor(phi,0,Ltru)); % rotation error
     dS = rgamotor(0,d,Ltru); % translation error
     dR.anti = true; dS.anti = true;
@@ -163,17 +170,32 @@ for i = n:-1:1
     M{i,1} = a(i); N{i,1} = b(i);
     M{i,2} = f(i); N{i,2} = g(i);
     M{i,3} = K(i); N{i,3} = L(i);
-    M{i,4} = R(i); N{i,4} = S(i);
+    %M{i,4} = R(i); N{i,4} = S(i);
 end
-M = M(:);
-N = N(:);
+%M = M(:);
+%N = N(:);
+%M = a;
+%N = b;
+M = reshape(M(:,[1 2]),[],1);
+N = reshape(N(:,[1 2]),[],1);
 
-Qhat = wahba(M,N);
-Qhat.anti = true;
-disp('Qhat =')
-disp(Qhat)
-[phi,d,v,m] = extract(Qhat)
-disp('Qhat - Q =')
-disp(Qhat - Q)
-[phi,d,v,m] = extract(rgamotor(Qhat - Q))
+Qest = wahba(M,N);
+Qest.anti = true;
+disp('Qtru = ')
+disp(Qtru)
+disp('Qest =')
+disp(Qest)
+disp('Qest - Q =')
+disp(Qest - Q)
+[phit,dt,vt,mt] = extract(Qtru);
+[phie,de,ve,me] = extract(Qest);
+disp('Rotation error [deg] (phie - phit) =')
+disp(180/pi*(phie-phit))
+disp('Translation error (de - dt) =')
+disp(de - dt)
+disp('True Direction & Moment of Screw Axis = ')
+disp([vt mt])
+disp('Est Direction & Moment of Screw Axis = ')
+disp([ve me])
+
 end
