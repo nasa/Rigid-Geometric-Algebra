@@ -22,13 +22,16 @@ for i = lenM:-1:1
     mw(:,i) = weight(Mi).m'; nw(:,i) = weight(Ni).m';
     mb(:,i) = bulk(Mi).m'; nb(:,i) = bulk(Ni).m';
 end
+U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse
 
 %% Solve for rotational part of motor
 C = 0;
 for i = 1:lenM
     C = C + Psi(nw(:,i))'*Xi(mw(:,i));
+    %C = C + Psi(nw(:,i)+nb(:,i))'*Xi(mw(:,i)+mb(:,i)); % works for unit directions
+    %C = C + Psi(nw(:,i)+nb(:,i))'*Xi(mw(:,i)) + U*Xi(nw(:,i)+nb(:,i))'*Psi(mw(:,i))*U;
 end
-C = (C+C')/2;
+C = (C+C');
 Ew(16,4) = 1; Ew(11:-1:9,1:3) = eye(3);
 [V,e] = eig(Ew'*C*Ew,'vector');
 V = real(V); e = real(e);
@@ -42,16 +45,17 @@ else
 end
 
 %% Solve for remaining part of motor
-U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse
 C = 0;
 d = 0;
 for i = 1:lenM
     C = C + (Xi(qw)'*Xi(mw(:,i)) + Psi(qw)*Psi(mw(:,i))*U);
     d = d + nb(:,i) - Xi(qw)'*Psi(qw)*mb(:,i);
 end
-Eb(16,4) = 0; Eb([1 6:8],:) = eye(4);
+Eb(16,4) = 0; Eb([6:8 1],:) = eye(4); % s = Eb'*qb
 %qb = Eb*((Eb'*(C'*C)*Eb)\(Eb'*C'*d));
 qb = Eb*lsqminnorm((Eb'*(C'*C)*Eb),(Eb'*C'*d));
+%qb = Eb*pinv((Eb'*(C'*C)*Eb))*(Eb'*C'*d);
+%qb = Eb*Eb'*lsqminnorm(C,d);
 rnk = rank(Eb'*(C'*C)*Eb);
 if rnk < 4
     warning(['Translational solution may be inaccurate; rank = ',...
@@ -60,7 +64,7 @@ end
 
 %% Enforce constraints and create output motor
 qw = qw/norm(qw);
-qb([1 6:8]) = reject(qb([1 6:8]),qw([16 11 10 9]));
+qb([6:8 1]) = reject(qb([6:8 1]),qw([11 10 9 16]));
 Q = unitize(rgamotor(qw([11 10 9 16]),qb([6:8 1])));
 end
 
@@ -138,22 +142,23 @@ end
 
 function test
 %% Test Wahba
-Ltru = unitize(rgaline);
-phi = pi*rand - pi;
-d = 10*randn;
-R = unitize(rgamotor(phi,0,Ltru)); % pure rotation about L
+%Ltru = unitize(rgaline);
+%phi = pi*rand - pi;
+%d = 10*randn;
+%R = unitize(rgamotor(phi,0,Ltru)); % pure rotation about L
 %R0 = unitize(rgamotor(phi,0,direction(Ltru))); % pure rotation about origin
-S = rgamotor(0,d,Ltru); % pure translation along direction of L
-%S0 = rgamotor(0,d,direction(Ltru)); % shuold be same as S
-R.anti = true; S.anti = true; 
+%S = rgamotor(0,d,Ltru); % pure translation along direction of L
+%S0 = rgamotor(0,d,direction(Ltru)); % should be same as S
+%R.anti = true; S.anti = true; 
 %R0.anti = true; S0.anti = true;
 %Q0 = rgamotor(R0*S0);
-Qtru = rgamotor(R*S);
-%Qtru = unitize(rgamotor); Q.anti = true;
-n = 16;
+%Qtru = rgamotor(R*S);
+Qtru = unitize(rgamotor); Qtru.anti = true;
+[~,~,Ltru] = extract(Qtru);
+n = 4;
 for i = n:-1:1
-    phi = pi/4*randn;
-    d = 3*randn;
+    phi = 0*pi/4*randn;
+    d = 0*3*randn;
     dR = unitize(rgamotor(phi,0,Ltru)); % rotation error
     dS = rgamotor(0,d,Ltru); % translation error
     dR.anti = true; dS.anti = true;
@@ -162,22 +167,23 @@ for i = n:-1:1
     a(i) = unitize(rgapoint); a(i).anti = true;
     b(i) = rgapoint(Q*a(i)*~Q); b(i).anti = true;
     f(i) = unitize(rgaplane); % anti by default
-    g(i) = rgaplane(Q*f(i)*~Q); 
+    g(i) = rgaplane(Q*f(i)*~Q);
+    u(i) = rgaline(unit(randn(1,3)),zeros(1,3)); u(i).anti = true;
+    v(i) = rgaline(Q*u(i)*~Q); v(i).anti = true;
     K(i) = unitize(rgaline); K(i).anti = true;
     L(i) = rgaline(Q*K(i)*~Q); L(i).anti = true;
     R(i) = unitize(rgamotor); R(i).anti = true;
     S(i) = rgamotor(Q*R(i)*~Q); S(i).anti = true;
-    M{i,1} = a(i); N{i,1} = b(i);
-    M{i,2} = f(i); N{i,2} = g(i);
-    M{i,3} = K(i); N{i,3} = L(i);
-    %M{i,4} = R(i); N{i,4} = S(i);
+    M{i,1} = a(i); N{i,1} = b(i); % points
+    M{i,2} = f(i); N{i,2} = g(i); % planes
+    M{i,3} = u(i); N{i,3} = v(i); % directions
+    M{i,4} = K(i); N{i,4} = L(i); % lines
+    M{i,5} = R(i); N{i,5} = S(i); % motors
 end
 %M = M(:);
 %N = N(:);
-%M = a;
-%N = b;
-M = reshape(M(:,[1 2]),[],1);
-N = reshape(N(:,[1 2]),[],1);
+M = reshape(M(:,[1:4]),[],1);
+N = reshape(N(:,[1:4]),[],1);
 
 Qest = wahba(M,N);
 Qest.anti = true;
@@ -192,7 +198,7 @@ disp(Qest - Q)
 disp('Rotation error [deg] (phie - phit) =')
 disp(180/pi*(phie-phit))
 disp('Translation error (de - dt) =')
-disp(de - dt)
+disp(de - dt)%, if abs(de-dt)>1, keyboard, end
 disp('True Direction & Moment of Screw Axis = ')
 disp([vt mt])
 disp('Est Direction & Moment of Screw Axis = ')

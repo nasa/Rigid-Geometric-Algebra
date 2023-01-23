@@ -7,8 +7,9 @@ classdef rgamotor < rga
             switch nargin
                 case 0
                     r = randn(4,1);
-                    u = randn(3,1);
-                    u(4) = -1/r(4)*(dot(r(1:3),u(1:3)));
+                    u = randn(4,1);
+                    u = u - (u'*r)/(r'*r)*r;
+                    %u(4) = -1/r(4)*(dot(r(1:3),u(1:3)));
                 case 1 % input is a multivector
                     %obj = varargin{1}; % doesn't preserve class
                     obj.m = varargin{1}.m;
@@ -52,10 +53,14 @@ classdef rgamotor < rga
             %UNITIZE Unitize the motor
             obj.m([9:11 16]) = obj.m([9:11 16])/norm(obj.m([9:11 16]));
             if obj.m(16) < 0
-                obj.m([9:11 16]) = -obj.m([9:11 16]);
+                %obj.m([9:11 16]) = -obj.m([9:11 16]);
+                obj.m = -obj.m;
+                %warning('motor orientation sign swapped')
             end
-            %obj.m(1) = -1/obj.m(16)*dot(obj.m([11 10 9]),obj.m(6:8));
-            %obj = obj - proj(bulk(obj),weight(obj));
+            obj.m([6:8 1]) = obj.m([6:8 1]) ...
+                - dot(obj.m([6:8 1]),obj.m([11 10 9 16])) ...
+                / dot(obj.m([11 10 9 16]),obj.m([11 10 9 16])) ...
+                * obj.m([11 10 9 16]);
             obj = rgamotor(obj);
         end
 
@@ -69,7 +74,7 @@ classdef rgamotor < rga
             sph = sin(phi);
             d = -(obj.e0/sph);
             v = [obj.e41 obj.e42 obj.e43]/sph;
-            m = ([obj.e23 obj.e31 obj.e12]- d*v*cos(phi))/sph;
+            m = ([obj.e23 obj.e31 obj.e12] - d*v*cos(phi))/sph;
             varargout{1} = phi;
             varargout{2} = d;
             if nargout == 3
