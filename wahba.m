@@ -8,7 +8,10 @@ function Q = wahba(M,N)
 
 if nargin < 1
     test
-    Q = @test;
+    Q = @test; % returns function handle so test can be called from 
+    % outside, including with options, e.g. 
+    % Q(points=1,planes=0,directions=0,lines=2,motors=0)
+    % See arguments block of test for full set of options
     return
 end
 
@@ -53,8 +56,8 @@ for i = 1:lenM
     d = d + nb(:,i) - Xi(qw)'*Psi(qw)*mb(:,i);
 end
 Eb(16,4) = 0; Eb([6:8 1],:) = eye(4); % s = Eb'*qb
-%qb = Eb*((Eb'*(C'*C)*Eb)\(Eb'*C'*d));
-qb = Eb*lsqminnorm((Eb'*(C'*C)*Eb),(Eb'*C'*d));
+qb = Eb*((Eb'*(C'*C)*Eb)\(Eb'*C'*d));
+%qb = Eb*lsqminnorm((Eb'*(C'*C)*Eb),(Eb'*C'*d));
 %qb = Eb*pinv((Eb'*(C'*C)*Eb))*(Eb'*C'*d);
 %qb = Eb*Eb'*lsqminnorm(C,d);
 rnk = rank(Eb'*(C'*C)*Eb);
