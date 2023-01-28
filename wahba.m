@@ -35,9 +35,9 @@ for i = 1:lenM
     %C = C + Psi(nw(:,i)+nb(:,i))'*Xi(mw(:,i)+mb(:,i)); % works for unit directions
     %C = C + Psi(nw(:,i)+nb(:,i))'*Xi(mw(:,i)) + U*Xi(nw(:,i)+nb(:,i))'*Psi(mw(:,i))*U;
 end
-C = (C+C');
-Ew(16,4) = 1; Ew(11:-1:9,1:3) = eye(3);
-[V,e] = eig(Ew'*C*Ew,'vector');
+C = (C+C')/2;
+Hw(16,4) = 1; Hw(11:-1:9,1:3) = eye(3);
+[V,e] = eig(Hw'*C*Hw,'vector');
 V = real(V); e = real(e);
 V(abs(V)<1e4*eps) = 0;
 if all(all(abs(V-eye(4)) < 1e4*eps))
@@ -45,7 +45,8 @@ if all(all(abs(V-eye(4)) < 1e4*eps))
     warning('Identity rotation found; possibly due to poor observability')
 else
     [~,k] = sort(e,'descend');
-    qw = Ew*V(:,k(1));
+    qw = Hw*V(:,k(1));
+    %qw = Hw*V(:,k(end));
 end
 
 %% Solve for remaining part of motor
@@ -55,12 +56,19 @@ for i = 1:lenM
     C = C + (Xi(qw)'*Xi(mw(:,i)) + Psi(qw)*Psi(mw(:,i))*U);
     d = d + nb(:,i) - Xi(qw)'*Psi(qw)*mb(:,i);
 end
-Eb(16,4) = 0; Eb([6:8 1],:) = eye(4); % s = Eb'*qb
-qb = Eb*((Eb'*(C'*C)*Eb)\(Eb'*C'*d));
-%qb = Eb*lsqminnorm((Eb'*(C'*C)*Eb),(Eb'*C'*d));
-%qb = Eb*pinv((Eb'*(C'*C)*Eb))*(Eb'*C'*d);
-%qb = Eb*Eb'*lsqminnorm(C,d);
-rnk = rank(Eb'*(C'*C)*Eb);
+Hb(16,4) = 0; Hb([6:8 1],:) = eye(4); % s = Hb'*qb
+Chat = C*Hb;
+qwhat = Hw'*qw;
+D = (eye(4)-qwhat*qwhat')*Chat';
+qb = Hb*((D*Chat)\(D*d));
+%D = Hb'*(eye(16)-qw*qw')*C';
+%qb = Hb*((D*C*Hb)\(D*d));
+%qb = Hb*((Hb'*(I-qw*qw')*(C'*C)*Hb)\(Hb'*(I-qw*qw')*C'*d));
+%qb = Hb*((Hb'*(C'*C)*Hb)\(Hb'*C'*d));
+%qb = Hb*lsqminnorm((Hb'*(C'*C)*Hb),(Hb'*C'*d));
+%qb = Hb*pinv((Hb'*(C'*C)*Hb))*(Hb'*C'*d);
+%qb = Hb*Hb'*lsqminnorm(C,d);
+rnk = rank(Hb'*(C'*C)*Hb);
 if rnk < 4
     warning(['Translational solution may be inaccurate; rank = ',...
         num2str(rnk), ' vs. 4 needed'])
