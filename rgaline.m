@@ -37,6 +37,10 @@ classdef rgaline < rga
         function obj = unitize(obj)
             %UNITIZE Unitize the line
             obj.m(9:11) = obj.m(9:11)/norm(obj.m(9:11));
+            obj.m(6:8) = obj.m(6:8) ...
+                - dot(obj.m(6:8),obj.m([11 10 9])) ...
+                / dot(obj.m([11 10 9]),obj.m([11 10 9])) ...
+                * obj.m([11 10 9]);
         end
 
         function obj = direction(obj)
