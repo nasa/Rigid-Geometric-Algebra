@@ -45,6 +45,9 @@ if all(all(abs(V-eye(4)) < 1e4*eps))
     warning('Identity rotation found; possibly due to poor observability')
 else
     [~,k] = sort(e,'descend');
+    if abs(e(k(1))-e(k(2))) < 10*eps(e(k(1)))
+        warning('Repeated eigenvalues in rotational solution')
+    end
     qw = Hw*V(:,k(1));
     %qw = Hw*V(:,k(end));
 end
@@ -57,10 +60,28 @@ for i = 1:lenM
     d = d + nb(:,i) - Xi(qw)'*Psi(qw)*mb(:,i);
 end
 Hb(16,4) = 0; Hb([6:8 1],:) = eye(4); % s = Hb'*qb
+
+%A = [C'*C Hb*Hw'*qw; qw'*Hw*Hb' 0];
+%a = A\[C'*d; 0];
+%qb = a(1:end-1);
+
 Chat = C*Hb;
 qwhat = Hw'*qw;
-D = (eye(4)-qwhat*qwhat')*Chat';
-qb = Hb*((D*Chat)\(D*d));
+%A = [Chat'*Chat qwhat; qwhat' 0];
+%rnk = rank(A) - 1;
+A = [Chat'*Chat; qwhat'];
+rnk = rank(A);
+if rnk < 4
+    warning(['Translational solution may be inaccurate; rank = ',...
+        num2str(rnk), ' vs. 4 needed'])
+end
+%a = A\[Chat'*d; 0];
+%qb = Hb*a(1:end-1);
+qb = Hb*(A\[Chat'*d; 0]);
+
+%D = (eye(4)+qwhat*qwhat')*Chat';
+%qb = Hb*((D*Chat)\(D*d));
+
 %D = Hb'*(eye(16)-qw*qw')*C';
 %qb = Hb*((D*C*Hb)\(D*d));
 %qb = Hb*((Hb'*(I-qw*qw')*(C'*C)*Hb)\(Hb'*(I-qw*qw')*C'*d));
@@ -68,11 +89,8 @@ qb = Hb*((D*Chat)\(D*d));
 %qb = Hb*lsqminnorm((Hb'*(C'*C)*Hb),(Hb'*C'*d));
 %qb = Hb*pinv((Hb'*(C'*C)*Hb))*(Hb'*C'*d);
 %qb = Hb*Hb'*lsqminnorm(C,d);
-rnk = rank(Hb'*(C'*C)*Hb);
-if rnk < 4
-    warning(['Translational solution may be inaccurate; rank = ',...
-        num2str(rnk), ' vs. 4 needed'])
-end
+%rnk = rank(Hb'*(C'*C)*Hb);
+%rnk = rank(D*Chat);
 
 %% Enforce constraints and create output motor
 qw = qw/norm(qw);
@@ -182,8 +200,8 @@ end
 %Qtru = rgamotor(R*S);
 Qtru = unitize(rgamotor); Qtru.anti = true;
 [~,~,vtru,mtru] = extract(Qtru);
-n = opts.points + opts.planes + opts.directions + opts.lines + opts.motors;
-for i = n:-1:1
+nobs = opts.points + opts.planes + opts.directions + opts.lines + opts.motors;
+for i = nobs:-1:1
     pherr = opts.rotation_sigma*randn;
     derr = opts.translation_sigma*randn;
     vper = vtru + opts.axis_sigma*randn(1,3);
@@ -246,6 +264,12 @@ end
 %N = N(:);
 %M = reshape(M(:,[2 4]),[],1);
 %N = reshape(N(:,[2 4]),[],1);
+%for i = nobs:-1:1
+%    m(:,i) = M{i}.m';
+%    n(:,i) = N{i}.m';
+%end
+%disp('Rank of m''*m = ')
+%disp(rank(m'*m))
 
 Qest = wahba(M,N);
 Qest.anti = true;
