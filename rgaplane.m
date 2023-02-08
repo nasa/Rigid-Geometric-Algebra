@@ -4,6 +4,7 @@ classdef rgaplane < rga
     methods
         function obj = rgaplane(x,y,z,w)
             %RGAPLANE Construct RGA plane from its normal
+            % Defaults to anti basis.
             switch nargin
                 case 0
                     obj.m = fliplr([0 randn(1,4) zeros(1,11)]);

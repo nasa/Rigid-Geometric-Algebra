@@ -4,6 +4,7 @@ classdef rgamotor < rga
     methods
         function obj = rgamotor(varargin)
             %RGAMOTOR Construct rigid motion operator for rotation & translation
+            % Defaults to anti basis.
             switch nargin
                 case 0
                     r = randn(4,1);
@@ -47,6 +48,7 @@ classdef rgamotor < rga
                     obj.m = [u(4); zeros(4,1); u(1:3); r([3 2 1]); zeros(4,1); r(4)];
                 end
             end
+            obj.anti = true;
         end
 
         function obj = unitize(obj)

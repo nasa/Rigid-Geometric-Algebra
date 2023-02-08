@@ -1,10 +1,13 @@
 classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
     % G(3,0,1)
     %   Geometric Algebra for homogeneous 4D space w/Lengyal's basis elements.
+    % https://projectivegeometricalgebra.org/
+    % https://rigidgeometricalgebra.org/wiki/index.php?title=Main_Page
+
 
     properties
         m (1,16) % coefficients of [e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234]
-        anti = false % set to true to use anti-basis elements
+        anti = false % set to true to use anti-basis elements; is "sticky" or dominant
         dispeps = 1e-15 % threshold for displaying small terms; set to 0 to show all
     end
 
@@ -174,23 +177,37 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = plus(a,b)
             %PLUS RGA addition
+            % If both inputs are the same type of object, output will
+            % be the same type.
+            % If at least one input uses the anti basis, output will too.
             % If only one input is a multivector, then this adds the other
-            % input to the scalar component of the multivector.
+            % input to the scalar component of the multivector, and the
+            % output will be a generic rga object.
             obj = rga;
             arga = isa(a,"rga");
             brga = isa(b,"rga");
             if arga && brga
                 obj.m = a.m + b.m;
-            elseif ~arga
+                cla = class(a); clb = class(b);
+                if matches(cla,clb) % Enforce common subclass
+                    obj = feval(cla,obj);
+                end
+                aanti = a.anti;
+                banti = b.anti;
+            elseif ~arga && length(a)==1
                 obj.m = b.m;
                 obj.m(1) = a + obj.m(1);
-            elseif ~brga
+                aanti = false;
+                banti = b.anti;
+            elseif ~brga && length(b)==1
                 obj.m = a.m;
                 obj.m(1) = obj.m(1) + b;
+                aanti = a.anti;
+                banti = false;
             else
                 error('Inputs incompatible')
             end
-            if a.anti && b.anti
+            if aanti || banti % Enforce stickiness of anti property
                 obj.anti = true;
             end
         end
@@ -281,6 +298,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = dot(a,b)
             %DOT RGA dot product
+            % If at least one input uses the anti basis, output will too.
             arga = isa(a,"rga");
             brga = isa(b,"rga");
             if arga && brga
@@ -290,13 +308,14 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             else
                 error('Inputs incompatible')
             end
-            if a.anti && b.anti
+            if a.anti || b.anti % Enforce stickiness
                 obj.anti = true;
             end
         end
 
         function obj = antidot(a,b)
             %ANTIDOT RGA anti-dot product
+            % If at least one input uses the anti basis, output will too.
             arga = isa(a,"rga");
             brga = isa(b,"rga");
             if arga && brga
@@ -306,7 +325,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             else
                 error('Inputs incompatible')
             end
-            if a.anti && b.anti
+            if a.anti || b.anti % Enforce stickiness
                 obj.anti = true;
             end
         end
@@ -323,18 +342,39 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = wedgedot(a,b)
             %WEDGEDOT RGA wedgedot product
+            % If both inputs are the same type of object, output will
+            % be the same type.
+            % If at least one input uses the anti basis, output will too.
+            % If only one input is a multivector, the other input must be
+            % an ordinary scalar, and the output type will be the type of
+            % the input multivector.
             obj = rga;
             arga = isa(a,"rga");
             brga = isa(b,"rga");
             if arga && brga
                 A = productmat(a,"wedgedot");
                 obj.m = A*b.m(:);
-            elseif ~arga
-                obj.m = a .* b.m;
-            elseif ~brga
-                obj.m = b .* a.m;
+                cla = class(a); clb = class(b);
+                if matches(cla,clb) % Enforce common subclass
+                    obj = feval(cla,obj);
+                end
+                aanti = a.anti;
+                banti = b.anti;
+            elseif ~arga && length(a)==1
+                obj.m = a * b.m;
+                obj = feval(class(b),obj);
+                aanti = false;
+                banti = b.anti;
+            elseif ~brga && length(b)==1
+                obj.m = b * a.m;
+                obj = feval(class(a),obj);
+                aanti = a.anti;
+                banti = false;
             else
                 error('Inputs incompatible')
+            end
+            if aanti || banti % Enforce stickiness of anti property
+                obj.anti = true;
             end
         end
 
@@ -350,18 +390,39 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = wedge(a,b)
             %WEDGE RGA wedge product
+            % If both inputs are the same type of object, output will
+            % be the same type.
+            % If at least one input uses the anti basis, output will too.
+            % If only one input is a multivector, the other input must be
+            % an ordinary scalar, and the output type will be the type of
+            % the input multivector.
             obj = rga;
             arga = isa(a,"rga");
             brga = isa(b,"rga");
             if arga && brga
                 A = productmat(a,"wedge");
                 obj.m = A*b.m(:);
-            elseif ~arga
-                obj.m = a .* b.m;
-            elseif ~brga
-                obj.m = b .* a.m;
+                cla = class(a); clb = class(b);
+                if matches(cla,clb) % Enforce common subclass
+                    obj = feval(cla,obj);
+                end
+                aanti = a.anti;
+                banti = b.anti;
+            elseif ~arga && length(a)==1
+                obj.m = a * b.m;
+                obj = feval(class(b),obj);
+                aanti = false;
+                banti = b.anti;
+            elseif ~brga && length(b)==1
+                obj.m = b * a.m;
+                obj = feval(class(a),obj);
+                aanti = a.anti;
+                banti = false;
             else
                 error('Inputs incompatible')
+            end
+            if aanti || banti % Enforce stickiness
+                obj.anti = true;
             end
         end
 
@@ -519,8 +580,10 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             %SCREW Translate and rotate the object X using the motor M
             arguments
                 M (1,1) rgamotor
-                X (1,1)
+                X (1,1) rga
             end
+            clX = class(X);
+            anX = X.anti;
             M = unitize(M);
             if isa(X,'rgapoint')
                 [A,B] = productmat(M,'motor');
@@ -529,14 +592,20 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             else
                 X = antiwedgedot(antiwedgedot(M,X),antirev(M));
             end
+            X = feval(clX,X);
+            if anX
+                X.anti = true;
+            end
         end
 
         function X = unscrew(M,X)
             %UNSCREW Untranslate and unrotate the object X using the motor M
             arguments
                 M (1,1) rgamotor
-                X (1,1)
+                X (1,1) rga
             end
+            clX = class(X);
+            anX = X.anti;
             M = unitize(M);
             if isa(X,'rgapoint')
                 [A,B] = productmat(M,'motor');
@@ -544,6 +613,10 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                 X = rga([0; (A-B)*x(:); zeros(11,1)]);
             else
                 X = antiwedgedot(antiwedgedot(antrev(M),X),M);
+            end
+            X = feval(clX,X);
+            if anX
+                X.anti = true;
             end
         end
 
