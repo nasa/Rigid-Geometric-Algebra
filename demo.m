@@ -98,6 +98,18 @@ N1 = antiwedgedot(Q1,antiwedgedot(L1,antirev(Q1)))
 N2 = Q1*L1*~Q1
 [ph1,d1,v1,m1] = extract(Q1) % Extract angle, distance, direction & moment
 
+%% Arrays of RGA objects
+% Can use ordinary Matlab array indexing for objects of same type, but for
+% heterogenous combinations, must use cell arrays.  At present, one cannot
+% perform linear algebra on these arrays... this would be an interesting
+% thing to pursue eventually.  There is a "Clifford Multivector Toolbox,"
+% which partially inspired the RGA class, that does permit such operations,
+% and it also supports arbitrary GA signatures.
+M = [M1 M2; M3 M4]
+M(1)
+H = {P1 L1 F1 Q1}
+H{4}
+
 %% Now for some plotting and geometry
 clf
 hold off
