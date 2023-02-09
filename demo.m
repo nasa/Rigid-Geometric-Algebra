@@ -1,6 +1,10 @@
-%% Demonstrate capabilities of RGA class
+%% *Demonstrate capabilities of RGA class*
+
+%% Introduction
 % There are lots of methods implemented in RGA; only a few demo'd here.
-% Click the documentation hyperlinks for more info.
+% Click the documentation hyperlinks for more info.  For best enjoyment of
+% this demo, try using the Matlab editor publish function, and/or save it
+% and run it as a Live Script.
 clear
 clc
 help rga
