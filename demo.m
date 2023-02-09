@@ -171,6 +171,9 @@ wahba_test(points=0,planes=0,directions=2,lines=0,motors=0,fullpose=false,...
     direction_sigma=0.1) % original Wahba w/noise
 
 %% Display basis element product tables
+% Each cell in the interior of a table shows the application of the
+% specified product to the pair of elements specified in the corresponding
+% 1st row and 1st column, in that order.  Zero results are blank.
 rga.producttab('wedge')
 rga.producttab('wedgedot')
 rga.producttab('antiwedge')
