@@ -65,7 +65,11 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                     obj.anti = true;
                 end
             else
-                obj.m = v;
+                if isa(v,"rga")
+                    obj = v;
+                else
+                    obj.m = v;
+                end
             end
             if nargin == 2
                 obj.anti = anti;
@@ -342,8 +346,6 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = wedgedot(a,b)
             %WEDGEDOT RGA wedgedot product
-            % If both inputs are the same type of object, output will
-            % be the same type.
             % If at least one input uses the anti basis, output will too.
             % If only one input is a multivector, the other input must be
             % an ordinary scalar, and the output type will be the type of
@@ -354,10 +356,6 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             if arga && brga
                 A = productmat(a,"wedgedot");
                 obj.m = A*b.m(:);
-                cla = class(a); clb = class(b);
-                if matches(cla,clb) % Enforce common subclass
-                    obj = feval(cla,obj);
-                end
                 aanti = a.anti;
                 banti = b.anti;
             elseif ~arga && length(a)==1
@@ -390,8 +388,6 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = wedge(a,b)
             %WEDGE RGA wedge product
-            % If both inputs are the same type of object, output will
-            % be the same type.
             % If at least one input uses the anti basis, output will too.
             % If only one input is a multivector, the other input must be
             % an ordinary scalar, and the output type will be the type of
@@ -402,10 +398,6 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             if arga && brga
                 A = productmat(a,"wedge");
                 obj.m = A*b.m(:);
-                cla = class(a); clb = class(b);
-                if matches(cla,clb) % Enforce common subclass
-                    obj = feval(cla,obj);
-                end
                 aanti = a.anti;
                 banti = b.anti;
             elseif ~arga && length(a)==1

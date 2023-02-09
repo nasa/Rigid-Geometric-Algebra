@@ -12,6 +12,8 @@ classdef rgaplane < rga
                     if isa(x,"rga")
                         t = trivector(x);
                         obj.m = t.m;
+                        obj.anti = x.anti;
+                        obj.dispeps = x.dispeps;
                     else
                         obj.m = fliplr([0 x(:)' zeros(1,11)]);
                     end

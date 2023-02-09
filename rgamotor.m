@@ -10,7 +10,6 @@ classdef rgamotor < rga
                     r = randn(4,1);
                     u = randn(4,1);
                     u = u - (u'*r)/(r'*r)*r;
-                    %u(4) = -1/r(4)*(dot(r(1:3),u(1:3)));
                 case 1 % input is a multivector
                     %obj = varargin{1}; % doesn't preserve class
                     obj.m = varargin{1}.m;
@@ -40,15 +39,16 @@ classdef rgamotor < rga
                 Q = L*sin(phi) + rga("e1234")*cos(phi) ...
                     + antiwedgedot(d,L)*cos(phi) - d*sin(phi);
                 obj.m = Q.m;
+                obj.anti = true;
             elseif exist("r","var") && exist("u","var")
                 r = r(:); u = u(:);
                 if isnumeric(r) && isnumeric(u) && abs(r'*u) > 100*eps
                     error('Bulk & Weight must be perpendicular')
                 else
                     obj.m = [u(4); zeros(4,1); u(1:3); r([3 2 1]); zeros(4,1); r(4)];
+                    obj.anti = true;
                 end
             end
-            obj.anti = true;
         end
 
         function obj = unitize(obj)

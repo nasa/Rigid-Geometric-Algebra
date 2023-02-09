@@ -7,6 +7,8 @@ classdef rgaline < rga
             if nargin == 1 && isa(varargin{1},'rga')
                 b = bivector(varargin{1});
                 obj.m = b.m;
+                obj.anti = varargin{1}.anti;
+                obj.dispeps = varargin{1}.dispeps;
             else
                 switch nargin
                     case 0

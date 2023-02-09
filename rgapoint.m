@@ -11,6 +11,8 @@ classdef rgapoint < rga
                     if isa(x,'rga')
                         v = vector(x);
                         obj.m = v.m;
+                        obj.anti = x.anti;
+                        obj.dispeps = x.dispeps;
                     else
                         obj.m = [0 x(:)' zeros(1,11)];
                     end

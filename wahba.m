@@ -7,11 +7,7 @@ function Q = wahba(M,N)
 % mixed types within M & N, then M & N must be cell arrays.
 
 if nargin < 1
-    test
-    Q = @test; % returns function handle so test can be called from 
-    % outside, including with options, e.g. 
-    % Q(points=1,planes=0,directions=0,lines=2,motors=0)
-    % See arguments block of test for full set of options
+    wahba_test
     return
 end
 
@@ -32,8 +28,6 @@ U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse
 C = 0;
 for i = 1:lenM
     C = C + Psi(nw(:,i))'*Xi(mw(:,i));
-    %C = C + Psi(nw(:,i)+nb(:,i))'*Xi(mw(:,i)+mb(:,i)); % works for unit directions
-    %C = C + Psi(nw(:,i)+nb(:,i))'*Xi(mw(:,i)) + U*Xi(nw(:,i)+nb(:,i))'*Psi(mw(:,i))*U;
 end
 C = (C+C')/2;
 Hw(16,4) = 1; Hw(11:-1:9,1:3) = eye(3);
@@ -49,7 +43,6 @@ else
         warning('Repeated eigenvalues in rotational solution')
     end
     qw = Hw*V(:,k(1));
-    %qw = Hw*V(:,k(end));
 end
 
 %% Solve for remaining part of motor
@@ -61,40 +54,17 @@ for i = 1:lenM
 end
 Hb(16,4) = 0; Hb([6:8 1],:) = eye(4); % s = Hb'*qb
 
-%A = [C'*C Hb*Hw'*qw; qw'*Hw*Hb' 0];
-%a = A\[C'*d; 0];
-%qb = a(1:end-1);
-
 Chat = C*Hb;
 qwhat = Hw'*qw;
-%A = [Chat'*Chat qwhat; qwhat' 0];
-%rnk = rank(A) - 1;
 A = [Chat'*Chat; qwhat'];
 rnk = rank(A);
 if rnk < 4
     warning(['Translational solution may be inaccurate; rank = ',...
         num2str(rnk), ' vs. 4 needed'])
 end
-%a = A\[Chat'*d; 0];
-%qb = Hb*a(1:end-1);
 qb = Hb*(A\[Chat'*d; 0]);
 
-%D = (eye(4)+qwhat*qwhat')*Chat';
-%qb = Hb*((D*Chat)\(D*d));
-
-%D = Hb'*(eye(16)-qw*qw')*C';
-%qb = Hb*((D*C*Hb)\(D*d));
-%qb = Hb*((Hb'*(I-qw*qw')*(C'*C)*Hb)\(Hb'*(I-qw*qw')*C'*d));
-%qb = Hb*((Hb'*(C'*C)*Hb)\(Hb'*C'*d));
-%qb = Hb*lsqminnorm((Hb'*(C'*C)*Hb),(Hb'*C'*d));
-%qb = Hb*pinv((Hb'*(C'*C)*Hb))*(Hb'*C'*d);
-%qb = Hb*Hb'*lsqminnorm(C,d);
-%rnk = rank(Hb'*(C'*C)*Hb);
-%rnk = rank(D*Chat);
-
-%% Enforce constraints and create output motor
-qw = qw/norm(qw);
-qb([6:8 1]) = reject(qb([6:8 1]),qw([11 10 9 16]));
+%% Create output motor
 Q = unitize(rgamotor(qw([11 10 9 16]),qb([6:8 1])));
 end
 
@@ -164,130 +134,4 @@ B = [p,  t4f',           t3,  b4f',            b3f',           v4,   v3f',      
    -v4,  b4f',           -s,  -t4f',           v3f',           p,    -b3f',          t3;
    O31,  O33,            -b4, O33,             -v4*I+skew(t4), O31,  p*I-skew(b4),   t4;
    0,    O13,            v4,  O13,             b4',            0,    t4',            p];
-end
-
-function a2 = reject(a,b)
-a2 = a - dot(a,b)/dot(b,b)*b;
-end
-
-function test(opts)
-%% Test Wahba
-arguments
-    opts.points (1,1) double = 1
-    opts.point_sigma (1,1) double = 0
-    opts.planes (1,1) double = 1
-    opts.plane_sigma (1,1) = 0
-    opts.directions (1,1) double = 1
-    opts.direction_sigma (1,1) double = 0
-    opts.lines (1,1) = 1
-    opts.line_sigma (1,1) double = 0
-    opts.motors (1,1) double = 1
-    opts.motor_sigma (1,1) double = 0
-    opts.rotation_sigma (1,1) double = 0
-    opts.translation_sigma (1,1) double = 0
-    opts.axis_sigma (1,1) double = 0;
-end
-%Ltru = unitize(rgaline);
-%phi = pi*rand - pi;
-%d = 10*randn;
-%R = unitize(rgamotor(phi,0,Ltru)); % pure rotation about L
-%R0 = unitize(rgamotor(phi,0,direction(Ltru))); % pure rotation about origin
-%S = rgamotor(0,d,Ltru); % pure translation along direction of L
-%S0 = rgamotor(0,d,direction(Ltru)); % should be same as S
-%R.anti = true; S.anti = true; 
-%R0.anti = true; S0.anti = true;
-%Q0 = rgamotor(R0*S0);
-%Qtru = rgamotor(R*S);
-Qtru = unitize(rgamotor); Qtru.anti = true;
-[~,~,vtru,mtru] = extract(Qtru);
-nobs = opts.points + opts.planes + opts.directions + opts.lines + opts.motors;
-for i = nobs:-1:1
-    pherr = opts.rotation_sigma*randn;
-    derr = opts.translation_sigma*randn;
-    vper = vtru + opts.axis_sigma*randn(1,3);
-    mper = mtru + opts.axis_sigma*randn(1,3);
-    mper = reject(mper,vper);
-    Lper = unitize(rgaline(vper,mper)); % perturbed axis (dir & mom)
-    dR = unitize(rgamotor(pherr,0,Lper)); % rotation error
-    dS = rgamotor(0,derr,Lper); % translation error
-    dR.anti = true; dS.anti = true;
-    dQ = rgamotor(dR*dS); % motor error
-    Q = dQ*Qtru*~dQ;
-    if opts.points
-        M{i} = unitize(rgapoint); M{i}.anti = true;
-        N{i} = rgapoint(Q*M{i}*~Q); N{i}.anti = true;
-        if opts.point_sigma
-            N{i}.m = N{i}.m + opts.point_sigma*randn(1,16).*N{i}.m;
-            N{i} = unitize(N{i});
-        end
-        opts.points = opts.points - 1;
-    elseif opts.planes
-        M{i} = unitize(rgaplane); % anti by default
-        N{i} = rgaplane(Q*M{i}*~Q);
-        if opts.plane_sigma
-            N{i}.m = N{i}.m + opts.plane_sigma*randn(1,16).*N{i}.m;
-            N{i} = unitize(N{i});
-        end
-        opts.planes = opts.planes - 1;
-    elseif opts.directions
-        M{i} = rgaline(unit(randn(1,3)),zeros(1,3)); M{i}.anti = true;
-        N{i} = rgaline(Q*M{i}*~Q); N{i}.anti = true;
-        if opts.direction_sigma
-            N{i}.m = N{i}.m + opts.direction_sigma*randn(1,16).*N{i}.m;
-            N{i} = unitize(N{i});
-        end
-        opts.directions = opts.directions - 1;
-    elseif opts.lines
-        M{i} = unitize(rgaline); M{i}.anti = true;
-        N{i} = rgaline(Q*M{i}*~Q); N{i}.anti = true;
-        if opts.line_sigma
-            N{i}.m = N{i}.m + opts.line_sigma*randn(1,16).*N{i}.m;
-            N{i} = unitize(N{i});
-        end
-        opts.lines = opts.lines - 1;
-    elseif opts.motors
-        M{i} = unitize(rgamotor); M{i}.anti = true;
-        N{i} = rgamotor(Q*M{i}*~Q); N{i}.anti = true;
-        if opts.motor_sigma
-            N{i}.m = N{i}.m + opts.motor_sigma*randn(1,16).*N{i}.m;
-            N{i} = unitize(N{i});
-        end
-        opts.motors = opts.motors - 1;
-    end
-    %M{i,1} = a(i); N{i,1} = b(i); % points
-    %M{i,2} = f(i); N{i,2} = g(i); % planes
-    %M{i,3} = u(i); N{i,3} = v(i); % directions
-    %M{i,4} = K(i); N{i,4} = L(i); % lines
-    %M{i,5} = R(i); N{i,5} = S(i); % motors
-end
-%M = M(:);
-%N = N(:);
-%M = reshape(M(:,[2 4]),[],1);
-%N = reshape(N(:,[2 4]),[],1);
-%for i = nobs:-1:1
-%    m(:,i) = M{i}.m';
-%    n(:,i) = N{i}.m';
-%end
-%disp('Rank of m''*m = ')
-%disp(rank(m'*m))
-
-Qest = wahba(M,N);
-Qest.anti = true;
-disp('Qtru = ')
-disp(Qtru)
-disp('Qest =')
-disp(Qest)
-disp('Qest - Q =')
-disp(Qest - Q)
-[phit,dt,vt,mt] = extract(Qtru);
-[phie,de,ve,me] = extract(Qest);
-disp('Rotation error [deg] (phie - phit) =')
-disp(180/pi*(phie-phit))
-disp('Translation error (de - dt) =')
-disp(de - dt)%, if abs(de-dt)>1, keyboard, end
-disp('True Direction & Moment of Screw Axis = ')
-disp([vt mt])
-disp('Est Direction & Moment of Screw Axis = ')
-disp([ve me])
-
 end
