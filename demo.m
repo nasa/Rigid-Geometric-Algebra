@@ -165,3 +165,11 @@ wahba_test(points=1,planes=2,directions=0,lines=0,motors=0,...
 wahba_test(points=0,planes=0,directions=2,lines=0,motors=0,fullpose=false) % original Wahba
 wahba_test(points=0,planes=0,directions=2,lines=0,motors=0,fullpose=false,...
     direction_sigma=0.1) % original Wahba w/noise
+
+%% Display basis element product tables
+rga.producttab('wedge')
+rga.producttab('wedgedot')
+rga.producttab('antiwedge')
+rga.producttab('antiwedgedot')
+rga.producttab('rint')
+rga.producttab('lint')
