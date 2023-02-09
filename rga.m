@@ -1,13 +1,13 @@
 classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
-    % G(3,0,1)
-    %   Geometric Algebra for homogeneous 4D space w/Lengyal's basis elements.
-    % https://projectivegeometricalgebra.org/
-    % https://rigidgeometricalgebra.org/wiki/index.php?title=Main_Page
-
+    % G(3,0,1) Geometric Algebra for homogeneous transformations of 3D
+    % rigid bodies in 4D projective space, primarily based on Lengyal's
+    % conventions:
+    %    https://projectivegeometricalgebra.org/
+    %    https://rigidgeometricalgebra.org/
 
     properties
         m (1,16) % coefficients of [e0 e1 e2 e3 e4 e23 e31 e12 e43 e42 e41 e321 e412 e431 e423 e1234]
-        anti = false % set to true to use anti-basis elements; is "sticky" or dominant
+        anti = false % set to true to use anti-basis elements; will "stick" to any obj it touches
         dispeps = 1e-15 % threshold for displaying small terms; set to 0 to show all
     end
 
@@ -378,10 +378,11 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = mtimes(a,b)
             % Overload * as wedgedot product
-            if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
+            %if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
+            if (isa(a,'rga') && isa(b,'rga')) && (a.anti || b.anti)
                 obj = antiwedgedot(a,b);
                 obj.anti = true;
-            else
+            else % if either a or b is not a multivector, anti doesn't matter
                 obj = wedgedot(a,b);
             end
         end

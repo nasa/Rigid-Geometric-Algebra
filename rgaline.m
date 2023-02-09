@@ -1,9 +1,20 @@
 classdef rgaline < rga
     %RGALINE RGA Line
-    % Subclass of RGA
+    %   Subclass of RGA
+    %   In RGA, a line in 3D space is the pair of bivectors that
+    %   specify the line's moment and direction.  It is the
+    %   projection of the 4D plane spanned by the moment & direction
+    %   bivectors onto the plane with projective coordinate w=1. As
+    %   for any line, the moment and direction must be perpendicular.
+    %   A unitized line has a unit direction vector.
+    
     methods
         function obj = rgaline(varargin)
             %RGALINE Line specified by direction & moment vectors
+            %  L = rgaline creates a random RGA line object
+            %  L = rgaline(M) subclasses the RGA object M into a line
+            %  L = rgaline(v,m) creates a line from direction v & moment m
+            %  L = rgaline(vx,vy,vz,mx,my,mz) uses the direction & moment components
             if nargin == 1 && isa(varargin{1},'rga')
                 b = bivector(varargin{1});
                 obj.m = b.m;

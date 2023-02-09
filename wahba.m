@@ -5,6 +5,7 @@ function Q = wahba(M,N)
 % If all objects in M & N are the same multivector type, e.g. they are all
 % planes, all points, etc. then M & N can be ordinary arrays.  If there are
 % mixed types within M & N, then M & N must be cell arrays.
+% This function requires the rga class.
 
 if nargin < 1
     wahba_test

@@ -13,9 +13,13 @@ arguments
     opts.motor_sigma (1,1) double = 0
     opts.rotation_sigma (1,1) double = 0
     opts.translation_sigma (1,1) double = 0
-    opts.axis_sigma (1,1) double = 0;
+    opts.axis_sigma (1,1) double = 0
+    opts.fullpose (1,1) logical = true
 end
 Qtru = unitize(rgamotor); Qtru.anti = true;
+if ~opts.fullpose
+    Qtru = weight(Qtru);
+end
 [~,~,vtru,mtru] = extract(Qtru);
 nobs = opts.points + opts.planes + opts.directions + opts.lines + opts.motors;
 for i = nobs:-1:1

@@ -1,9 +1,21 @@
 classdef rgaplane < rga
     %RGAPLANE RGA Plane
-    % Subclass of RGA
+    %   Subclass of RGA
+    %   In RGA, a plane in 3D space is a four-element trivector whose
+    %   elements specify the plane's normal and its distance from the
+    %   origin.  It is the projection of a 4D volume spanned by the
+    %   trivector bases onto the onto the plane with projective coordinate
+    %   w=1.  A plane is dual to a point in that when expressed in the dual
+    %   or anti basis elements, it looks like a point.  For this reason,
+    %   the constructor defaults to anti basis.  A unitized point has unit
+    %   normal vector.
     methods
         function obj = rgaplane(x,y,z,w)
             %RGAPLANE Construct RGA plane from its normal
+            % F = rgaplane creates a random RGA plane object
+            % F = rgaplane(M) subclasses the RGA object M into a plane
+            % F = rgaplane(nx,ny,nz) creates a plane with normal n at w=1
+            % F = rgaplane(nx,ny,nz,w) creates a plane at (nx,ny,nz,w)
             % Defaults to anti basis.
             switch nargin
                 case 0

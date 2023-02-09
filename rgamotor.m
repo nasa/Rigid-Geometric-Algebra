@@ -1,9 +1,27 @@
 classdef rgamotor < rga
     %RGAMOTOR RGA Motor: Rigid motion operator for rotation & translation
     % Subclass of RGA
+    % In RGA a motor Q is an object such that Q*x*~Q, where * indicates
+    % antiwedgedot, and ~ indicates antireverse, rotates & translates the
+    % RGA object x though angle 2\phi about axis L and distance 2d along L.
+    % L can be any unitized line, i.e. it does not have to pass through the
+    % origin.  A motor has 6 bivector elements along with a scalar and a 
+    % pseudoscalar element.  By analogy with dual quaternion, four of the 
+    % elements correspond to the real part, and four to the dual part.
+    % The real and dual parts must be perpendicular, and the real part must
+    % have unit norm for a well-posed rotation & translation operation.
+    % Unitization ensures these contraints are met.
     methods
         function obj = rgamotor(varargin)
             %RGAMOTOR Construct rigid motion operator for rotation & translation
+            %  Q = rgamotor creates a random RGA motor object
+            %  Q = rgamotor(M) subclasses the RGA object M into a motor
+            %  Q = rgamotor(r,u) creates a motor from dual quaternion r + eps*u
+            %  Q = rgamotor(phi,d,L) uses the angle phi, distance d, and axis L
+            %  Q = rgamotor(phi,d,v,m) uses the angle phi, distance d, and
+            %      axis direction & moment, v & m
+            %  Q = rgamotor(phi,d,vx,vy,vz,mx,my,mz) uses the angle phi,
+            %      distance d, and axis direction & moment components
             % Defaults to anti basis.
             switch nargin
                 case 0

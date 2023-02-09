@@ -1,9 +1,19 @@
 classdef rgapoint < rga
     %RGAPOINT RGA Point
     %   Subclass of RGA
+    %   In RGA, a point in 3D space is the 4-vector (x,y,z,1).  This
+    %   is the projection of a 4D line onto the hyperplane at w=1.
+    %   A unitized point has w=1.  Non-unit points are projections of
+    %   the 4D line onto hyperplanes parallel to ordinary 3D space.
+
     methods
         function obj = rgapoint(x,y,z,w)
             %RGAPOINT Create RGA Point object
+            %  P = rgapoint creates a random RGA point object
+            %  P = rgapoint(M) subclasses the RGA object M into a point
+            %  P = rgapoint(x) creates a point from a 4-element vector x
+            %  P = rgapoint(x,y,z) creates a point at w = 1
+            %  P = rgapoint(x,y,z,w) creates a point at (x,y,z,w)
             switch nargin
                 case 0
                     obj.m = [0 randn(1,4) zeros(1,11)];
