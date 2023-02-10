@@ -192,3 +192,26 @@ rga.producttab('antiwedge')
 rga.producttab('antiwedgedot')
 rga.producttab('rint')
 rga.producttab('lint')
+
+%% Using linear algebra representation
+% It is sometimes convenient work with a linear algebra representation of
+% RGA objects and operations. Just as complex numbers and quaternions can
+% be represented as 2- or 4-element linear algebra column or row vectors,
+% respectively, RGA objects can be cast as 16-element linear algebra
+% vectors.  These can be extracted from the "m" property of an RGA object
+% contains the coefficients of the basis elements.  And just as products
+% involving complex numbers, quaternions, and cross-products of ordinary
+% vectors can be represented as a matrix-vector product, so can RGA
+% products.  Keep in mind that the linear algebra vectors will always
+% contain the coefficients in the same order as the regular basis vectors,
+% not the reversed order of the anti-basis elements.  Many other RGA
+% operations can be represented as linear algebra matrix-vector products,
+% e.g. reverses and anti-reverses.
+m1 = M1.m % Extract multivect coefficients into linear algebra vector
+m6 = M6.m
+productmat(M1,"wedge") % 16x16 matrix that can be used to multiply M1 by something
+(productmat(M1,"wedge")*M3.m(:))' % = linear algebra version of M1^M3
+wedge(M1,M3)
+U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse matrix
+(U*M1.m(:))'
+antirev(M1)
