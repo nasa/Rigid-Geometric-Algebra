@@ -11,32 +11,18 @@ if nargin < 1
     wahba_test
     return
 end
-
-%% Transcribe multivectors to column vectors
 lenM = length(M);
-for i = lenM:-1:1
-    if iscell(M)
-        Mi = M{i}; Ni = N{i};
-    else
-        Mi = M(i); Ni = N(i);
-    end
-    mw(:,i) = weight(Mi).m'; nw(:,i) = weight(Ni).m';
-    mb(:,i) = bulk(Mi).m'; nb(:,i) = bulk(Ni).m';
-end
-U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse
 
 %% Null-space approach 
 % Solve for motor in one step
 H([1 6:11 16],:) = eye(8);
-%C = 0;
-C = [];
+C = 0;
+%C = [];
 for i = 1:lenM
     B = Xi(M{i}.m) - Psi(N{i}.m);
-    %C = C + B'*B;
-    C = [C;B*H];
+    C = C + B'*B;
 end
-%A = C*H;
-A = C;
+A = C*H;
 [~,S,V] = svd(A,'vector');
 tol = max(size(A))*eps(norm(A));
 if sum(S<tol) > 1
@@ -49,6 +35,18 @@ Qsvd = rgamotor(rga(H*V(:,k),true));
 %longer a null vector, so need to scale entire thing!
 Q = unitize(1/norm(Qsvd,'weight')*Qsvd);
 return
+
+%% Transcribe multivectors to column vectors
+for i = lenM:-1:1
+    if iscell(M)
+        Mi = M{i}; Ni = N{i};
+    else
+        Mi = M(i); Ni = N(i);
+    end
+    mw(:,i) = weight(Mi).m'; nw(:,i) = weight(Ni).m';
+    mb(:,i) = bulk(Mi).m'; nb(:,i) = bulk(Ni).m';
+end
+U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse
 
 %% Solve for rotational part of motor
 C = 0;
