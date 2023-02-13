@@ -25,6 +25,24 @@ for i = lenM:-1:1
 end
 U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse
 
+%% Null-space approach 
+% Solve for motor in one step
+C = 0;
+for i = 1:lenM
+    B = Xi(M{i}.m) - Psi(N{i}.m);
+    C = C + B'*B;
+end
+H([1 6:11 16],:) = eye(8);
+H = eye(16);
+A = C*H;
+[~,S,V] = svd(A,'vector');
+tol = max(size(A))*eps(norm(A));
+if sum(S<tol) > 1
+    warning('Null space spans more than one motor')
+end
+[~,k] = min(S);
+Qsvd = unitize(rgamotor(rga(H*V(:,k),true)))
+
 %% Solve for rotational part of motor
 C = 0;
 for i = 1:lenM
@@ -66,7 +84,8 @@ end
 qb = Hb*(A\[Chat'*d; 0]);
 
 %% Create output motor
-Q = unitize(rgamotor(qw([11 10 9 16]),qb([6:8 1])));
+Q = unitize(rgamotor(qw([11 10 9 16]),qb([6:8 1])))
+keyboard
 end
 
 %% Helper functions
