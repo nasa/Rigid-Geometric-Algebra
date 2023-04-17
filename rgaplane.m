@@ -65,9 +65,10 @@ classdef rgaplane < rga
             hold on
             for i = 1:4
                 j = mod(i,4)+1;
-                quiver3(v(i,1),v(i,2),v(i,3),v(j,1)-v(i,1),v(j,2)-v(i,2),v(j,3)-v(i,3),...
-                    'color',c);
+                hq(i) = quiver3(v(i,1),v(i,2),v(i,3),v(j,1)-v(i,1),...
+                    v(j,2)-v(i,2),v(j,3)-v(i,3),'color',c); %#ok<AGROW>
             end
+            h.UserData = hq;
         end
     end
 
