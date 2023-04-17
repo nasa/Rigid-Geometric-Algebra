@@ -17,19 +17,18 @@ lenM = length(M);
 % Solve for motor in one step
 H([1 6:11 16],:) = eye(8);
 C = 0;
-%C = [];
 for i = 1:lenM
-    B = Xi(M{i}.m) - Psi(N{i}.m);
-    C = C + B'*B;
+    C = C + Xi(M{i}.m) - Psi(N{i}.m);
+    %B = Xi(M{i}.m) - Psi(N{i}.m);
+    %C = C + B'*B;
 end
 A = C*H;
 [~,S,V] = svd(A,'vector');
 tol = max(size(A))*eps(norm(A));
 if sum(S<tol) > 1
-    warning('Null space spans more than one motor')
+    warning('Null space of Xi(M)-Psi(N) spans more than one motor')
 end
 [~,k] = min(S);
-disp(S(k))
 Qsvd = rgamotor(rga(H*V(:,k),true));
 %Qsvd = unitize(rgamotor(rga(H*V(:,k),true))) if we unitize it, it's no
 %longer a null vector, so need to scale entire thing!
