@@ -255,7 +255,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                         v4,            O13,    s,           O13,            O13,   0,             O13,   0;
                         b3,       skew(v3),  O31,           s*I,            O33, O31,             O33, O31;
                         b4,           v4*J, -v3f,           O33,            s*I, O31,             O33, O31;
-                        t3,            O13,    0,          -v3',            O13,   s,             O13,   0;
+                        t3,           -b3',    0,          -v3',            O13,   s,             O13,   0;
                         t4,      -weks(b4),  b3f,          v4*J,     -skew(v3f)',O31,             s*I, O31;
                         p,           -t4f',  -t3,         -b4f',          -b3f',  v4,            v3f',   s];
                 case "motor"
@@ -539,9 +539,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                     (isa(a,'rgaline') && isa(b,'rgapoint'))
                 d = norm(commutate(a,b,"+^"),'weight') ...
                     /norm(commutate(a,b,"+v"),'weight');
-            elseif isa(a,'rgaline') && isa(b,'rgaline') || ...
-                    (isa(a,'rgapoint') && isa(b,'rgaplane')) || ...
-                    (isa(a,'rgaplane') && isa(b,'rgapoint'))
+            elseif isa(a,'rgaline') && isa(b,'rgaline')
                 d = norm(commutate(a,b,"+^"),'weight') ...
                     /norm(commutate(a,b,"-v"),'weight');
             else
