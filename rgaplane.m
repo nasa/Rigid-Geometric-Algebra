@@ -45,20 +45,36 @@ classdef rgaplane < rga
             obj.m(12:15) = obj.m(12:15)/norm(obj.m(13:15));
         end
 
-        function h = plot(obj)
+        function h = plot(obj,o)
             %PLOT Plot the plane
             % use ax + by + cz + d = 0
+            % Project origin, or 2nd input pt, onto plane, then use patch
+            if nargin == 1
+                o = rgapoint(0,0,0);
+            end
+            if dist(obj,o) == 0
+                poF = o;
+            else
+                poF = unitize(rgapoint(antiwedge(weightlc(obj)^o,obj)));
+            end
+            dx = poF.m(2);
+            dy = poF.m(3);
+            dz = poF.m(4);
+            obj.m(abs(obj.m)<eps*norm(obj.m)) = 0; % avoid division by tiny
             a = obj.m(15); b = obj.m(14); c = obj.m(13); d = obj.m(12);
             if c==0 && b==0 % just plot yz plane
-                h = patch(-d/a*[1 1 1 1],[1 1 -1 -1],[1 -1 -1 1],'c','FaceAlpha',0.5);
+                h = patch(-d/a*[1 1 1 1],[1 1 -1 -1]+dy,[1 -1 -1 1]+dz,...
+                    'c','FaceAlpha',0.5);
             elseif c==0 && a==0 % just plot xz plane
-                h = patch([1 -1 -1 1],-d/b*[1 1 1 1],[1 1 -1 -1],'c','FaceAlpha',0.5);
+                h = patch([1 -1 -1 1]+dx,-d/b*[1 1 1 1],[1 1 -1 -1]+dz,...
+                    'c','FaceAlpha',0.5);
             elseif b==0 && a==0 % just plot xy plane
-                h = patch([1 -1 -1 1],[1 1 -1 -1],-d/c*[1 1 1 1],'c','FaceAlpha',0.5);
+                h = patch([1 -1 -1 1]+dx,[1 1 -1 -1]+dy,-d/c*[1 1 1 1],...
+                    'c','FaceAlpha',0.5);
             else
-                x = [1 -1 -1 1];
-                y = [1 1 -1 -1];
-                z = -1/c*(a*x + b*y + d);
+                x = [1 -1 -1 1]+dx;
+                y = [1 1 -1 -1]+dy;
+                z = -1/c*(a*x + b*y + d);% + dz;
                 h = patch(x,y,z,'c','FaceAlpha',0.5);
             end
             v = h.Vertices;

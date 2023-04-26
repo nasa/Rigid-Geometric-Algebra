@@ -67,11 +67,17 @@ classdef rgaline < rga
             obj.m([1:5 9:end]) = 0;
         end
 
-        function h = plot(obj)
+        function h = plot(obj,o)
             %PLOT Plot the line
-            % Project origin onto line, then use quiver
-            o = rgapoint(0,0,0);
-            poL = antiwedge(weightlc(obj)^o,obj);
+            % Project origin, or 2nd input pt, onto line, then use quiver
+            if nargin == 1
+                o = rgapoint(0,0,0);
+            end
+            if dist(obj,o) == 0
+                poL = o;
+            else
+                poL = antiwedge(weightlc(obj)^o,obj);
+            end
             h = quiver3(poL.m(2)/poL.m(5),poL.m(3)/poL.m(5),poL.m(4)/poL.m(5),...
                 obj.m(11),obj.m(10),obj.m(9));
         end
