@@ -41,7 +41,8 @@ classdef rgaplane < rga
 
         function obj = unitize(obj)
             %UNITIZE Unitize the plane
-            obj.m(13:15) = obj.m(13:15)/norm(obj.m(13:15));
+            %obj.m(13:15) = obj.m(13:15)/norm(obj.m(13:15));
+            obj.m(12:15) = obj.m(12:15)/norm(obj.m(13:15));
         end
 
         function h = plot(obj)
