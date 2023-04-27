@@ -73,7 +73,7 @@ classdef rgaline < rga
             if nargin == 1
                 o = rgapoint(0,0,0);
             end
-            if dist(obj,o) == 0
+            if dist(obj,o) <= 10*eps
                 poL = o;
             else
                 poL = antiwedge(weightlc(obj)^o,obj);
