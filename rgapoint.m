@@ -37,7 +37,8 @@ classdef rgapoint < rga
 
         function obj = unitize(obj)
             %UNITIZE Unitize the point
-            obj.m(5) = 1;
+            %obj.m(5) = 1;
+            obj.m = obj.m/obj.m(5);
         end
 
         function h = plot(obj)
