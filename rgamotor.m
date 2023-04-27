@@ -117,6 +117,21 @@ classdef rgamotor < rga
                 varargout{4} = m;
             end
         end
+
+        function h = plot(obj)
+            %PLOT Plot the motor as a coordinate frame
+            o = screw(obj,rgapoint(0,0,0,1));
+            xax = screw(obj,rgapoint(1,0,0,1))-o;
+            yax = screw(obj,rgapoint(0,1,0,1))-o;
+            zax = screw(obj,rgapoint(0,0,1,1))-o;
+            hold on
+            ho = plot3(o.m(2),o.m(3),o.m(4),'k*');
+            hx = quiver3(o.m(2),o.m(3),o.m(4),xax.m(2),xax.m(3),xax.m(4),'r');
+            hy = quiver3(o.m(2),o.m(3),o.m(4),yax.m(2),yax.m(3),yax.m(4),'g');
+            hz = quiver3(o.m(2),o.m(3),o.m(4),zax.m(2),zax.m(3),zax.m(4),'b');
+            hy.Color = [0 .5 0];
+            h = [ho;hx;hy;hz];
+        end
     end
 
     methods(Access=protected)
