@@ -158,13 +158,24 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
         end
 
         function obj = not(obj)
-            % Overload ~ for reverse & antireverse
+            % Overload ~ for reverse & antireverse - DEPRECATED
+            warning('~ is being deprecated in favor of '' and .''')
             if obj.anti
                 obj = antirev(obj);
                 obj.anti = true;
             else
                 obj = rev(obj);
             end
+        end
+
+        function obj = ctranspose(obj)
+            % Overload ' for reverse
+            obj = rev(obj);
+        end
+
+        function obj = transpose(obj)
+            % Overload .' for anti-reverse
+            obj = antirev(obj);
         end
 
         function obj = rcomp(obj)
@@ -334,16 +345,6 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             end
         end
 
-        function obj = times(a,b)
-            % Overload .* as dot product
-            if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
-                obj = antidot(a,b);
-                obj.anti = true;
-            else
-                obj = dot(a,b);
-            end
-        end
-
         function obj = wedgedot(a,b)
             %WEDGEDOT RGA wedgedot product
             % If at least one input uses the anti basis, output will too.
@@ -378,13 +379,12 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = mtimes(a,b)
             % Overload * as wedgedot product
-            %if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
-            if (isa(a,'rga') && isa(b,'rga')) && (a.anti || b.anti)
-                obj = antiwedgedot(a,b);
-                obj.anti = true;
-            else % if either a or b is not a multivector, anti doesn't matter
-                obj = wedgedot(a,b);
-            end
+            obj = wedgedot(a,b);
+        end
+
+        function obj = times(a,b)
+            % Overload .* as antiwedgedot product
+            obj = antiwedgedot(a,b);
         end
 
         function obj = wedge(a,b)
@@ -421,11 +421,12 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = mpower(a,b)
             % Overload ^ as wedge product
-            if isa(a,"rga") && a.anti && isa(b,"rga") && b.anti
-                obj = antiwedge(a,b);
-            else
-                obj = wedge(a,b);
-            end
+            obj = wedge(a,b);
+        end
+
+        function obj = power(a,b)
+            % Overload .^ as wedge product
+            obj = antiwedge(a,b);
         end
 
         function obj = antiwedge(a,b)
