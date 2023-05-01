@@ -124,12 +124,20 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = bulk(obj)
             %BULK Bulk - portion not containing factors of e4
-            obj.m([5 9:11 13:end]) = 0;
+            if isempty(obj)
+                obj = diag([1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0]);
+            else
+                obj.m([5 9:11 13:end]) = 0;
+            end
         end
 
         function obj = weight(obj)
             %WEIGHT Weight - portion containing factors of e4
-            obj.m([1:4 6:8 12]) = 0;
+            if isempty(obj)
+                obj = diag([0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1]);
+            else
+                obj.m([1:4 6:8 12]) = 0;
+            end
         end
 
         function g = gr(obj)
@@ -149,12 +157,20 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = rev(obj)
             %REV Reverse
-            obj.m(6:15) = -obj.m(6:15);
+            if isempty(obj)
+                obj = diag([1 1 1 1 1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 1]);
+            else
+                obj.m(6:15) = -obj.m(6:15);
+            end
         end
 
         function obj = antirev(obj)
             %ANTIREV Anti-reverse
-            obj.m(2:11) = -obj.m(2:11);
+            if isempty(obj)
+                obj = diag([1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 1 1 1 1 1]);
+            else
+                obj.m(2:11) = -obj.m(2:11);
+            end
         end
 
         function obj = not(obj)
@@ -180,14 +196,22 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = rcomp(obj)
             %RCOMP Right complement
-            obj = rev(obj);
-            obj.m = flipud(obj.m(:));
+            obj = rev(obj); % if isempty(input obj) then LHS is a matrix
+            if isa(obj,"rga")
+                obj.m = flipud(obj.m(:));
+            else 
+                obj = flipud(obj); % rcomp(rga.empty)*a.m(:) <=> rcomp(a)
+            end
         end
 
         function obj = lcomp(obj)
             %LCOMP Left complement
             obj = antirev(obj);
-            obj.m = flipud(obj.m(:));
+            if isa(obj,"rga")
+                obj.m = flipud(obj.m(:));
+            else
+                obj = flipud(obj);
+            end
         end
 
         function obj = plus(a,b)
@@ -239,6 +263,8 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function [A,B] = productmat(obj,type)
             % PRODUCTMAT Matrices for computing various multivector products
+            % Common ones hardcoded here; less common ones
+            % computed on the fly via createprodmat
             I = eye(3); J = fliplr(I);
             weks = @(x) fliplr(skew(x));
             s = obj.m(1);
@@ -260,6 +286,9 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                         t3,           -b3',    0,          -v3',            O13,   s,             O13,   0;
                         t4,  -p*J-weks(b4),  b3f, v4*J+weks(t4), t3*I-skew(v3f)',-b4,   s*I+skew(b3f), v3f;
                         p,           -t4f',  -t3,         -b4f',          -b3f',  v4,            v3f',   s];
+                    if nargout == 2
+                        B = createprodmat(obj,@wedgedot,true);
+                    end
                 case "wedge"
                     A = [s,            O13,    0,           O13,            O13,   0,             O13,   0;
                         v3,            s*I,  O31,           O33,            O33, O31,             O33, O31;
@@ -269,6 +298,9 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                         t3,           -b3',    0,          -v3',            O13,   s,             O13,   0;
                         t4,      -weks(b4),  b3f,          v4*J,     -skew(v3f)',O31,             s*I, O31;
                         p,           -t4f',  -t3,         -b4f',          -b3f',  v4,            v3f',   s];
+                    if nargout == 2
+                        B = createprodmat(obj,@wedge,true);
+                    end
                 case "motor"
                     % Unitize attitude part first
                     r = [b4f;p];
@@ -287,7 +319,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                         -v4,  -b4f',           s,   t4f',           -v3f',           p,   -b3f',          t3;
                         O31,  O33,             b4,  O33,             v4*I-skew(t4),  O31,  p*I-skew(b4),  t4;
                         0,    O13,            -v4,  O13,            -b4',            0,    t4',           p]; 
-                    % B is s/t A*B*x is equal to Q*x*~Q 
+                    % B is s/t A(a)*B(a)*x is linear algebra equivalent to a.*x.*a.' 
                     B = [p,   t4f',           t3,  b4f',            b3f',           v4,   v3f',          s;
                         t4f,  p*I+skew(b4f),  b3,  -v4*I-skew(t4f), t3*J+weks(v3),  -b4f, -s*J-weks(b3), -v3;
                         0,    O13,            p,   O13,             -t4',           0,    b4',           -v4;
@@ -297,27 +329,38 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                         O31,  O33,            -b4, O33,             -v4*I+skew(t4), O31,  p*I-skew(b4),   t4;
                         0,    O13,            v4,  O13,             b4',            0,    t4',            p];
 
-                case "antiwedge"
+                case "antiwedge" 
                     A = [p, -t4f', -t3, -b4f',     -b3f', v4,  v3f',     s;
                         O31, p*I, O31,  -skew(t4f), t3*J,  b4f, weks(b3), v3;
-                        0,   O13, p,    O13,       -t4',  0,   O13,      v4;
+                        0,   O13, p,    O13,       -t4',  0,   -b4',      v4;
                         O31, O33, O31,  p*I,       O33,   t4f, -t3*J,    b3;
                         O31, O33, O31,  O33,       p*I,   O31, skew(t4), b4;
                         0,   O13, 0,  O13,       O13,   p,   O13,      t3;
                         O31, O33, O31,  O33,       O33,   O31, p*I,      t4;
                         0,   O13, 0,    O13,       O13,   0,   O13,      p]; 
+                    if nargout == 2
+                        B = createprodmat(obj,@antiwedge,true);
+                    end
                 otherwise
-                    error('product type not recognized')
+                    A = createprodmat(obj,eval(strcat("@",type)),false);
+                    if nargout == 2
+                        B = createprodmat(obj,eval(strcat("@",type)),true);
+                    end
+                    %error('product type not recognized')
             end
         end
 
         function obj = dot(a,b)
             %DOT RGA dot product
             % If at least one input uses the anti basis, output will too.
+            M = diag([1 1 1 1 0 -1 -1 -1 0 0 0 -1 0 0 0 0]);
             arga = isa(a,"rga");
+            if nargin == 1 && arga
+                obj = a.m(:)'*M;
+                return
+            end
             brga = isa(b,"rga");
             if arga && brga
-                M = diag([1 1 1 1 0 -1 -1 -1 0 0 0 -1 0 0 0 0]);
                 s = a.m(:)'*M*b.m(:);
                 obj = rga(s*eye(16,1));
             else
@@ -331,10 +374,14 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
         function obj = antidot(a,b)
             %ANTIDOT RGA anti-dot product
             % If at least one input uses the anti basis, output will too.
+            M = diag(fliplr([1 1 1 1 0 -1 -1 -1 0 0 0 -1 0 0 0 0]));
             arga = isa(a,"rga");
+            if nargin == 1 && arga
+                obj = a.m(:)'*M;
+                return
+            end
             brga = isa(b,"rga");
             if arga && brga
-                M = diag(fliplr([1 1 1 1 0 -1 -1 -1 0 0 0 -1 0 0 0 0]));
                 s = a.m(:)'*M*b.m(:);
                 obj = rga(s*flipud(eye(16,1)));
             else
@@ -351,9 +398,13 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             % If only one input is a multivector, the other input must be
             % an ordinary scalar, and the output type will be the type of
             % the input multivector.
-            obj = rga;
             arga = isa(a,"rga");
+            if nargin == 1 && arga
+                obj = productmat(a,"wedgedot");
+                return
+            end
             brga = isa(b,"rga");
+            obj = rga;
             if arga && brga
                 A = productmat(a,"wedgedot");
                 obj.m = A*b.m(:);
@@ -393,9 +444,13 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             % If only one input is a multivector, the other input must be
             % an ordinary scalar, and the output type will be the type of
             % the input multivector.
-            obj = rga;
             arga = isa(a,"rga");
+            if nargin == 1 && arga
+                obj = productmat(a,"wedge");
+                return
+            end
             brga = isa(b,"rga");
+            obj = rga;
             if arga && brga
                 A = productmat(a,"wedge");
                 obj.m = A*b.m(:);
@@ -431,32 +486,62 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = antiwedge(a,b)
             %ANTIWEDGE Anti-wedge product
-            obj = lcomp(wedge(rcomp(a),rcomp(b)));
+            if nargin == 1 && isa(a,"rga")
+                obj = productmat(a,"antiwedge");
+            else
+                obj = lcomp(wedge(rcomp(a),rcomp(b)));
+                %obj = rga;
+                %obj.m = productmat(a,"antiwedge")*b.m(:);
+            end
         end
 
         function obj = antiwedgedot(a,b)
             %ANTIWEDGEDOT Anti-wedgedot product
-            obj = lcomp(wedgedot(rcomp(a),rcomp(b)));
+            if nargin == 1 && isa(a,"rga")
+                % A(a)*b = antiwedgedot(a,b).m
+                obj = productmat(a,"antiwedgedot");
+            elseif nargin == 2 && isa(b,"rga") && isempty(a)
+                % B*(antirev(b))*a = A(a)*b = antiwedgedot(a,b).m
+                [~,obj] = productmat(b,"antiwedgedot");
+            else
+                obj = lcomp(wedgedot(rcomp(a),rcomp(b)));
+            end
         end
 
         function obj = rint(a,b)
             %RINT Right interior product
-            obj = antiwedge(a,rcomp(b));
+            if nargin == 1 && isa(a,"rga")
+                obj = antiwedge(a)*rcomp(rga.empty);
+            else
+                obj = antiwedge(a,rcomp(b));
+            end
         end
 
         function obj = lint(a,b)
             %LINT Left interior product
-            obj = antiwedge(lcomp(a),b);
+            if nargin == 1 && isa(a,"rga")
+                obj = antiwedge(lcomp(a));
+            else
+                obj = antiwedge(lcomp(a),b);
+            end
         end
 
         function obj = antirint(a,b)
             %ANTIRINT Right interior antiproduct
-            obj = wedge(a,rcomp(b));
+            if nargin == 1 && isa(a,"rga")
+                obj = wedge(a)*rcomp(rga.empty);
+            else
+                obj = wedge(a,rcomp(b));
+            end
         end
 
         function obj = antilint(a,b)
             %ANTILINT Left interior antiproduct
-            obj = wedge(lcomp(a),b);
+            if nargin == 1 && isa(a,"rga")
+                obj = wedge(lcomp(a));
+            else
+                obj = wedge(lcomp(a),b);
+            end
         end
 
         function obj = proj(a,b)
@@ -550,22 +635,40 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
         function obj = bulkrc(obj)
             %BULKRC Bulk right complement
-            obj = wedgedot(rev(obj),rga('e1234'));
+            if isempty(obj)
+                [~,B] = productmat(rga('e1234'),'wedgedot');
+                obj = B*rev(obj);
+            else
+                obj = wedgedot(rev(obj),rga('e1234'));
+            end
         end
 
         function obj = bulklc(obj)
             %BULKLC Bulk left complement
-            obj = wedgedot(antirev(obj),rga('e1234'));
+            if isempty(obj)
+                [~,B] = productmat(rga('e1234'),'wedgedot');
+                obj = B*antirev(obj);
+            else
+                obj = wedgedot(antirev(obj),rga('e1234'));
+            end
         end
 
         function obj = weightrc(obj)
             %WEIGHTRC Weight right complement
-            obj = antiwedgedot(rga('e0'),rev(obj));
+            if isempty(obj)
+                obj = antiwedgedot(rga('e0'))*rev(obj);
+            else
+                obj = antiwedgedot(rga('e0'),rev(obj));
+            end
         end
 
         function obj = weightlc(obj)
             %WEIGHTLC Weight left complement
-            obj = antiwedgedot(rga('e0'),antirev(obj));
+            if isempty(obj)
+                obj = antiwedgedot(rga('e0'))*antirev(obj);
+            else
+                obj = antiwedgedot(rga('e0'),antirev(obj));
+            end
         end
 
         function X = screw(M,X)
@@ -702,6 +805,21 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
 
     end
 
+    methods (Hidden)
+        function A = createprodmat(a,fnhandle,commute)
+            %CREATEPRODMAT Create product matrices c = A(a)*b or c = B(b)*a
+            e = cell(1,16);
+            [e{:}] = rga.bases;
+            for i = 16:-1:1
+                if commute % c = B(b)*a
+                    A(:,i) = fnhandle(e{i},a).m(:);
+                else % c = A(a)*b
+                    A(:,i) = fnhandle(a,e{i}).m(:);
+                end
+            end
+        end
+    end
+
     methods (Static)
 
         function [e0,e1,e2,e3,e4,e23,e31,e12,e43,e42,e41,e321,e412,e431,e423,e1234] = bases
@@ -782,7 +900,6 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             quiver3(0,-1,0,0,1,0,2,'color','#77AC30')
             quiver3(0,0,-1,0,0,1,2,'color','#0072BD')
         end
-
     end
 
     methods (Access = protected)
