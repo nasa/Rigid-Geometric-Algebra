@@ -62,7 +62,10 @@ classdef rgaplane < rga
             dz = poF.m(4);
             obj.m(abs(obj.m)<eps*norm(obj.m)) = 0; % avoid division by tiny
             a = obj.m(15); b = obj.m(14); c = obj.m(13); d = obj.m(12);
-            if c==0 && b==0 % just plot yz plane
+            if a==0 && b==0 && c==0
+                warning('Nothing to plot')
+                return
+            elseif c==0 && b==0 % just plot yz plane
                 h = patch(-d/a*[1 1 1 1],[1 1 -1 -1]+dy,[1 -1 -1 1]+dz,...
                     'c','FaceAlpha',0.5);
             elseif c==0 && a==0 % just plot xz plane
@@ -72,9 +75,19 @@ classdef rgaplane < rga
                 h = patch([1 -1 -1 1]+dx,[1 1 -1 -1]+dy,-d/c*[1 1 1 1],...
                     'c','FaceAlpha',0.5);
             else
-                x = [1 -1 -1 1]+dx;
-                y = [1 1 -1 -1]+dy;
-                z = -1/c*(a*x + b*y + d);% + dz;
+                if c~=0
+                    x = [1 -1 -1 1]+dx;
+                    y = [1 1 -1 -1]+dy;
+                    z = -1/c*(a*x + b*y + d);
+                elseif b~=0
+                    x = [1 -1 -1 1]+dx;
+                    z = [1 1 -1 -1]+dz;
+                    y = -1/b*(a*x + c*z + d);
+                elseif a~=0
+                    y = [1 1 -1 -1]+dy;
+                    z = [1 -1 -1 1]+dz;
+                    x = -1/a*(b*y + c*z + d);
+                end
                 h = patch(x,y,z,'c','FaceAlpha',0.5);
             end
             v = h.Vertices;
