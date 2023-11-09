@@ -335,7 +335,8 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
                         0,   O13, p,    O13,       -t4',  0,   -b4',      v4;
                         O31, O33, O31,  p*I,       O33,   t4f, -t3*J,    b3;
                         O31, O33, O31,  O33,       p*I,   O31, skew(t4), b4;
-                        0,   O13, 0,  O13,       O13,   p,   O13,      t3;
+                        %0,   O13, 0,  O13,       O13,   p,   O13,      t3;
+                         0,   O13, 0,  O13,       O13,   p,   -b3',      t3;
                         O31, O33, O31,  O33,       O33,   O31, p*I,      t4;
                         0,   O13, 0,    O13,       O13,   0,   O13,      p]; 
                     if nargout == 2
