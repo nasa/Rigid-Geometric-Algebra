@@ -11,9 +11,31 @@ if nargin < 1
     wahba_test
     return
 end
+lenM = length(M);
+
+%% Null-space approach 
+% Solve for motor in one step
+H([1 6:11 16],:) = eye(8);
+C = 0;
+for i = 1:lenM
+    C = C + Xi(M{i}.m) - Psi(N{i}.m);
+    %B = Xi(M{i}.m) - Psi(N{i}.m);
+    %C = C + B'*B;
+end
+A = C*H;
+[~,S,V] = svd(A,'vector');
+tol = max(size(A))*eps(norm(A));
+if sum(S<tol) > 1
+    warning('Null space of Xi(M)-Psi(N) spans more than one motor')
+end
+[~,k] = min(S);
+Qsvd = rgamotor(rga(H*V(:,k),true));
+%Qsvd = unitize(rgamotor(rga(H*V(:,k),true))) if we unitize it, it's no
+%longer a null vector, so need to scale entire thing!
+Q = unitize(1/norm(Qsvd,'weight')*Qsvd);
+return
 
 %% Transcribe multivectors to column vectors
-lenM = length(M);
 for i = lenM:-1:1
     if iscell(M)
         Mi = M{i}; Ni = N{i};
