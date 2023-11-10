@@ -10,13 +10,17 @@ clc
 help rga
 
 %% Creation of RGA objects
-% There are lots of ways to create RGA objects.  Here are a few.
+% There are lots of ways to create RGA objects.  Here are a few.  Note that
+% $e_0$ is the scalar element, and $e_{1234}$ is the pseudoscalar.  Also
+% note that some of the objects use $\epsilon$ rather than $e$ for basis
+% elements.  More on that below.
 P1 = rgapoint % create a random RGA point
 L1 = rgaline % create a random RGA line
 F1 = rgaplane % create random RGA plane
 Q1 = rgamotor % create random RGA motor
 M1 = rga % create random general RGA multivector
 P2 = rgapoint([53.767, 183.39, -225.88, 1]) % create specified RGA point
+F2 = rgaplane([0.52416, 1.3645, -1.2105, 0.070602]) % create RGA plane
 try
     L2 = rgaline(randn(3,1),randn(3,1)) % not all inputs are possible
 catch ME
@@ -70,32 +74,32 @@ B1 = dot(P1,P2) + wedge(P1,P2)
 B2 = wedgedot(P1,P2) % B2 = B1 *only* for vectors
 X1 = dot(L1,L2) + wedge(L1,L2)
 X2 = wedgedot(L1,L2)
-A1 = antidot(P1,P2) + antiwedgedot(P1,P2)
-A2 = antiwedgedot(P1,P2) % A2 = A1 *only* for vectors
+A1 = antidot(F1,F2) + antiwedge(F1,F2)
+A2 = antiwedgedot(F1,F2) % A2 = A1 *only* for planes (anti-vectors)
 Y1 = antidot(L1,L2) + antiwedge(L1,L2)
 Y2 = antiwedgedot(L1,L2)
 Z1 = wedge(P4,P5)
 Z2 = antiwedgedot(P4,P5)
 
 %% Using overloaded product operators
-% The mtimes method ('*') is overloaded to either wedgedot or antiwedgedot,
-% depending on the anti properties of the two input vectors.
-% At present (Feb 9, 2023), the mpower ('^') and times ('.*') methods are
-% also overloaded, for wedge/antiwedge and dot/antidot, respectively.  But
-% this functionality may be deprecated in future.
-B3 = P1*P2 % * is wedgedot since neither P1 nor P2 have anti = true
-P1.anti = true
-B4 = P1*P2 % * is antiwedgedot since P1 now uses anti basis
+% The mpower method ('^') is overloaded to the exterior (wedge) product,
+% and the mtimes method ('*') is overloaded to the geometric (wedgedot)
+% product. The element-wise versions of these (power, '.^' and times, .*)
+% are overloaded to the anti-wedge and anti-wedgedot products.
+B3 = P1^P2
+B4 = F1.^F2
+B5 = P1*P2
+B6 = F1.*F2
 
 %% Using reverses and antireverses
 % RGA motors perform screw operations using a sandwich antiproduct that
 % involves a generalization of the conjugate called the antireverse.  The
-% not operator ('~') is overloaded to apply the reverse or antireverse,
-% depending on the anti property setting.
+% transpose operators (' and .') are overloaded to apply the reverse or
+% antireverse, respectively
 R1 = rev(Q1)
 R2 = antirev(Q1)
 N1 = antiwedgedot(Q1,antiwedgedot(L1,antirev(Q1)))
-N2 = Q1*L1*~Q1
+N2 = Q1.*L1.*Q1.'
 [ph1,d1,v1,m1] = extract(Q1) % Extract angle, distance, direction & moment
 
 %% Arrays of RGA objects

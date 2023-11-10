@@ -32,11 +32,11 @@ for i = nobs:-1:1
     dR = unitize(rgamotor(pherr,0,Lper)); % rotation error
     dS = rgamotor(0,derr,Lper); % translation error
     dR.anti = true; dS.anti = true;
-    dQ = rgamotor(dR*dS); % motor error
-    Q = dQ*Qtru*~dQ;
+    dQ = rgamotor(dR.*dS); % motor error
+    Q = dQ.*Qtru.*dQ.';
     if opts.points
         M{i} = unitize(rgapoint); M{i}.anti = true;
-        N{i} = rgapoint(Q*M{i}*~Q); N{i}.anti = true;
+        N{i} = rgapoint(Q.*M{i}.*Q.'); N{i}.anti = true;
         if opts.point_sigma
             N{i}.m = N{i}.m + opts.point_sigma*randn(1,16).*N{i}.m;
             N{i} = unitize(N{i});
@@ -44,7 +44,7 @@ for i = nobs:-1:1
         opts.points = opts.points - 1;
     elseif opts.planes
         M{i} = unitize(rgaplane); % anti by default
-        N{i} = rgaplane(Q*M{i}*~Q);
+        N{i} = rgaplane(Q.*M{i}.*Q.');
         if opts.plane_sigma
             N{i}.m = N{i}.m + opts.plane_sigma*randn(1,16).*N{i}.m;
             N{i} = unitize(N{i});
@@ -52,7 +52,7 @@ for i = nobs:-1:1
         opts.planes = opts.planes - 1;
     elseif opts.directions
         M{i} = rgaline(unit(randn(1,3)),zeros(1,3)); M{i}.anti = true;
-        N{i} = rgaline(Q*M{i}*~Q); N{i}.anti = true;
+        N{i} = rgaline(Q.*M{i}.*Q.'); N{i}.anti = true;
         if opts.direction_sigma
             N{i}.m = N{i}.m + opts.direction_sigma*randn(1,16).*N{i}.m;
             N{i} = unitize(N{i});
@@ -60,7 +60,7 @@ for i = nobs:-1:1
         opts.directions = opts.directions - 1;
     elseif opts.lines
         M{i} = unitize(rgaline); M{i}.anti = true;
-        N{i} = rgaline(Q*M{i}*~Q); N{i}.anti = true;
+        N{i} = rgaline(Q.*M{i}.*Q.'); N{i}.anti = true;
         if opts.line_sigma
             N{i}.m = N{i}.m + opts.line_sigma*randn(1,16).*N{i}.m;
             N{i} = unitize(N{i});
@@ -68,7 +68,7 @@ for i = nobs:-1:1
         opts.lines = opts.lines - 1;
     elseif opts.motors
         M{i} = unitize(rgamotor); M{i}.anti = true;
-        N{i} = rgamotor(Q*M{i}*~Q); N{i}.anti = true;
+        N{i} = rgamotor(Q.*M{i}.*Q.'); N{i}.anti = true;
         if opts.motor_sigma
             N{i}.m = N{i}.m + opts.motor_sigma*randn(1,16).*N{i}.m;
             N{i} = unitize(N{i});
