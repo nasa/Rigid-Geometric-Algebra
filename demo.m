@@ -96,11 +96,11 @@ B6 = F1.*F2
 % involves a generalization of the conjugate called the antireverse.  The
 % transpose operators (' and .') are overloaded to apply the reverse or
 % antireverse, respectively
-R1 = rev(Q1)
-R2 = antirev(Q1)
-N1 = antiwedgedot(Q1,antiwedgedot(L1,antirev(Q1)))
-N2 = Q1.*L1.*Q1.'
-[ph1,d1,v1,m1] = extract(Q1) % Extract angle, distance, direction & moment
+R1 = rev(Q3)
+R2 = antirev(Q3)
+N1 = antiwedgedot(Q3,antiwedgedot(L1,antirev(Q3)))
+N2 = Q3.*L1.*Q3.'
+[ph3,d3,v3,m3] = extract(Q3) % Extract angle, distance, direction & moment
 
 %% Arrays of RGA objects
 % Can use ordinary Matlab array indexing for objects of same type, but for
