@@ -18,21 +18,34 @@ lenM = length(M);
 H([1 6:11 16],:) = eye(8);
 C = 0;
 for i = 1:lenM
-    C = C + Xi(M{i}.m) - Psi(N{i}.m);
-    %B = Xi(M{i}.m) - Psi(N{i}.m);
-    %C = C + B'*B;
+    %C = C + Xi(M{i}.m) - Psi(N{i}.m);
+    B = Xi(M{i}.m) - Psi(N{i}.m);
+    C = C + B'*B;
 end
 A = C*H;
 [~,S,V] = svd(A,'vector');
 tol = max(size(A))*eps(norm(A));
-if sum(S<tol) > 1
+k = find(S<tol);
+if isempty(k)
+    if any(abs(diff(S))<tol) % check for repeats
+        k = 7:8; % min pair since svd returns in decreasing order
+    else
+        k = 8; % no repeats so just one min that will be last
+    end
+end
+lenk = length(k);
+if lenk > 1
     warning('Null space of Xi(M)-Psi(N) spans more than one motor')
 end
-[~,k] = min(S);
-Qsvd = rgamotor(rga(H*V(:,k),true));
+%[~,k] = min(S); % not needed; svd returns them in decreasing order
+for j = lenk:-1:1
+    Qsvd(j) = rgamotor(rga(H*V(:,k(j)),true));
+    wtnormQ(j) = norm(Qsvd(j),'weight');
+end
 %Qsvd = unitize(rgamotor(rga(H*V(:,k),true))) if we unitize it, it's no
 %longer a null vector, so need to scale entire thing!
-Q = unitize(1/norm(Qsvd,'weight')*Qsvd);
+keep = (wtnormQ>tol);
+Q = unitize(1/wtnormQ(keep)*Qsvd(keep));
 return
 
 %% Transcribe multivectors to column vectors
