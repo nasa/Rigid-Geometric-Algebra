@@ -152,20 +152,21 @@ o = rgapoint(0,0,0);
 doL = dist(o,L);
 
 %% Create bounding box around origin big enough to contain the line
-fpx = rgaplane(-1,0,0,-doL); fmx = rgaplane(1,0,0,-doL);
-fpy = rgaplane(0,1,0,doL); fmy = rgaplane(0,-1,0,doL);
-fpz = rgaplane(0,0,-1,-doL); fmz = rgaplane(0,0,1,-doL);
-plot(fpx); plot(fmx);
-plot(fpy); plot(fmy);
-plot(fpz); plot(fmz);
+% Choose here to have all plane normals pointing "in" toward origin.
+fpx = rgaplane(-1,0,0,doL); hfpx = plot(fpx); hfpx.FaceColor = 'r';
+fmx = rgaplane(1,0,0,doL);  hfmx = plot(fmx); hfmx.FaceColor = 'm';
+fpy = rgaplane(0,-1,0,doL);  hfpy = plot(fpy); hfpy.FaceColor = 'g';
+fmy = rgaplane(0,1,0,doL); hfmy = plot(fmy); hfmy.FaceColor = 'y';
+fpz = rgaplane(0,0,-1,doL); hfpz = plot(fpz); hfpz.FaceColor = 'b';
+fmz = rgaplane(0,0,1,doL); hfmz = plot(fmz); hfmz.FaceColor = 'c';
 
 %% Search all 6 faces for intersections with line (at w=1)
-ipx = commutate(L,fpx,'+v');
-imx = commutate(L,fmx,'+v');
-ipy = commutate(L,fpy,'+v');
-imy = commutate(L,fmy,'+v');
-ipz = commutate(L,fpz,'+v');
-imz = commutate(L,fmz,'+v');
+ipx = unitize(rgapoint(commutate(L,fpx,'+v')));
+imx = unitize(rgapoint(commutate(L,fmx,'+v')));
+ipy = unitize(rgapoint(commutate(L,fpy,'+v')));
+imy = unitize(rgapoint(commutate(L,fmy,'+v')));
+ipz = unitize(rgapoint(commutate(L,fpz,'+v')));
+imz = unitize(rgapoint(commutate(L,fmz,'+v')));
 
 %% Plot line using intersection points
 if ipx.m(5)==1, plot3(ipx.m(2),ipx.m(3),ipx.m(4),'r+'), end

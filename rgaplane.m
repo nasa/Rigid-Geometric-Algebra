@@ -66,14 +66,29 @@ classdef rgaplane < rga
                 warning('Nothing to plot')
                 return
             elseif c==0 && b==0 % just plot yz plane
-                h = patch(-d/a*[1 1 1 1],[1 1 -1 -1]+dy,[1 -1 -1 1]+dz,...
-                    'c','FaceAlpha',0.5);
+                if a < 0
+                    y = [1 1 -1 -1]+dy;
+                else
+                    y = [-1 -1 1 1]+dy;
+                end
+                z = [1 -1 -1 1]+dz;
+                x = -d/a*[1 1 1 1];
             elseif c==0 && a==0 % just plot xz plane
-                h = patch([1 -1 -1 1]+dx,-d/b*[1 1 1 1],[1 1 -1 -1]+dz,...
-                    'c','FaceAlpha',0.5);
+                if b < 0
+                    z = [1 1 -1 -1]+dz;
+                else
+                    z = [-1 -1 1 1]+dz;
+                end
+                x = [1 -1 -1 1]+dx;
+                y = -d/b*[1 1 1 1];
             elseif b==0 && a==0 % just plot xy plane
-                h = patch([1 -1 -1 1]+dx,[1 1 -1 -1]+dy,-d/c*[1 1 1 1],...
-                    'c','FaceAlpha',0.5);
+                if c < 0
+                    y = [-1 -1 1 1]+dy;
+                else
+                    y = [1 1 -1 -1]+dy;
+                end
+                x = [1 -1 -1 1]+dx;
+                z = -d/c*[1 1 1 1];
             else
                 if c~=0
                     x = [1 -1 -1 1]+dx;
@@ -88,15 +103,27 @@ classdef rgaplane < rga
                     z = [1 -1 -1 1]+dz;
                     x = -1/a*(b*y + c*z + d);
                 end
-                h = patch(x,y,z,'c','FaceAlpha',0.5);
             end
+            h = patch(x,y,z,'c','FaceAlpha',0.5);
+            if isempty(findobj('type','Light'))
+                light % helps to visualize face normals
+            end
+            h.FaceNormals = [a b c];
+            % n = h.FaceNormals;
+            % if isempty(n)
+            %     pause(1e-9) % force time for Matlab to compute normals
+            %     n = h.FaceNormals;
+            % end
+            % if dot([a b c],n) < 0
+            %     h.FaceNormals = [a b c];
+            % end
             v = h.Vertices;
-            c = h.EdgeColor;
+            k = h.EdgeColor;
             hold on
             for i = 1:4
                 j = mod(i,4)+1;
                 hq(i) = quiver3(v(i,1),v(i,2),v(i,3),v(j,1)-v(i,1),...
-                    v(j,2)-v(i,2),v(j,3)-v(i,3),'color',c); %#ok<AGROW>
+                    v(j,2)-v(i,2),v(j,3)-v(i,3),'color',k); %#ok<AGROW>
             end
             h.UserData = hq;
         end
