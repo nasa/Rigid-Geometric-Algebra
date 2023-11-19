@@ -153,6 +153,8 @@ doL = dist(o,L);
 
 %% Create bounding box around origin big enough to contain the line
 % Choose here to have all plane normals pointing "in" toward origin.
+% (From eq. of a plane, distance from origin is oppositely directed from
+% the plane's normal vector.)
 fpx = rgaplane(-1,0,0,doL); hfpx = plot(fpx); hfpx.FaceColor = 'r';
 fmx = rgaplane(1,0,0,doL);  hfmx = plot(fmx); hfmx.FaceColor = 'm';
 fpy = rgaplane(0,-1,0,doL);  hfpy = plot(fpy); hfpy.FaceColor = 'g';

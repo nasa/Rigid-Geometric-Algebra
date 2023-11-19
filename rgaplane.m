@@ -91,17 +91,25 @@ classdef rgaplane < rga
                 z = -d/c*[1 1 1 1];
             else
                 if c~=0
+                    if c < 0
+                        y = [-1 -1 1 1]+dy;
+                    else
+                        y = [1 1 -1 -1]+dy;
+                    end
                     x = [1 -1 -1 1]+dx;
-                    y = [1 1 -1 -1]+dy;
                     z = -1/c*(a*x + b*y + d);
                 elseif b~=0
                     x = [1 -1 -1 1]+dx;
-                    z = [1 1 -1 -1]+dz;
+                    if b < 0
+                        z = [1 1 -1 -1]+dz;
+                    else
+                        z = [-1 -1 1 1]+dz;
+                    end
                     y = -1/b*(a*x + c*z + d);
-                elseif a~=0
-                    y = [1 1 -1 -1]+dy;
-                    z = [1 -1 -1 1]+dz;
-                    x = -1/a*(b*y + c*z + d);
+                %elseif a~=0 % only reached if c=b=0; covered above
+                %    y = [1 1 -1 -1]+dy;
+                %    z = [1 -1 -1 1]+dz;
+                %    x = -1/a*(b*y + c*z + d);
                 end
             end
             h = patch(x,y,z,'c','FaceAlpha',0.5);
@@ -126,6 +134,7 @@ classdef rgaplane < rga
                     v(j,2)-v(i,2),v(j,3)-v(i,3),'color',k); %#ok<AGROW>
             end
             h.UserData = hq;
+            h.DeleteFcn = @(~,~) delete(h.UserData);
         end
     end
 
