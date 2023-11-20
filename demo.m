@@ -173,15 +173,18 @@ imz = unitize(rgapoint(commutate(L,fmz,'+v'))); imz.anti = false;
 %% Plot line using intersection points
 % weight = 1e4 if intersection found, otherwise point is at infinity
 if weight(ipx)==rga('e4'), plot3(ipx.m(2),ipx.m(3),ipx.m(4),'r+'), end
-if weight(imx)==rga('e4'), plot3(imx.m(2),imx.m(3),imx.m(4),'ro'), end
-if weight(ipy)==rga('e4'), plot3(ipy.m(2),ipy.m(3),ipy.m(4),'k+'), end
-if weight(imy)==rga('e4'), plot3(imy.m(2),imy.m(3),imy.m(4),'ko'), end
+if weight(imx)==rga('e4'), plot3(imx.m(2),imx.m(3),imx.m(4),'mo'), end
+if weight(ipy)==rga('e4'), plot3(ipy.m(2),ipy.m(3),ipy.m(4),'g+'), end
+if weight(imy)==rga('e4'), plot3(imy.m(2),imy.m(3),imy.m(4),'yo'), end
 if weight(ipz)==rga('e4'), plot3(ipz.m(2),ipz.m(3),ipz.m(4),'b+'), end
-if weight(imz)==rga('e4'), plot3(imz.m(2),imz.m(3),imz.m(4),'bo'), end
+if weight(imz)==rga('e4'), plot3(imz.m(2),imz.m(3),imz.m(4),'co'), end
 
 %% Solving a Generalized Wahba Problem in RGA
 % Given a set of corresponding RGA objects, find the motor that relates
 % them. (Here, directions are unit lines through the origin)
+% For Wahba's original problem (rotation only), there will be a pair of
+% equal solutions, one of which incorrectly assigns the rotation to the
+% bulk in instead of the weight of the motor.
 wahba_test % default test case with each type noise-free observation
 wahba_test(points=1,planes=2,directions=0,lines=0,motors=0) % still noise-free
 wahba_test(points=1,planes=2,directions=0,lines=0,motors=0,...
