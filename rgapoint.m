@@ -38,7 +38,12 @@ classdef rgapoint < rga
         function obj = unitize(obj)
             %UNITIZE Unitize the point
             %obj.m(5) = 1;
-            obj.m = obj.m/obj.m(5);
+            if obj.m(5) == 0
+                warning('Point is at infinity; unitizing direction')
+                obj.m = obj.m/norm(obj.m);
+            else
+                obj.m = obj.m/obj.m(5);
+            end
         end
 
         function h = plot(obj)

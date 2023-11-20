@@ -163,20 +163,21 @@ fpz = rgaplane(0,0,-1,doL); hfpz = plot(fpz); hfpz.FaceColor = 'b';
 fmz = rgaplane(0,0,1,doL); hfmz = plot(fmz); hfmz.FaceColor = 'c';
 
 %% Search all 6 faces for intersections with line (at w=1)
-ipx = unitize(rgapoint(commutate(L,fpx,'+v')));
-imx = unitize(rgapoint(commutate(L,fmx,'+v')));
-ipy = unitize(rgapoint(commutate(L,fpy,'+v')));
-imy = unitize(rgapoint(commutate(L,fmy,'+v')));
-ipz = unitize(rgapoint(commutate(L,fpz,'+v')));
-imz = unitize(rgapoint(commutate(L,fmz,'+v')));
+ipx = unitize(rgapoint(commutate(L,fpx,'+v'))); ipx.anti = false;
+imx = unitize(rgapoint(commutate(L,fmx,'+v'))); imx.anti = false;
+ipy = unitize(rgapoint(commutate(L,fpy,'+v'))); ipy.anti = false;
+imy = unitize(rgapoint(commutate(L,fmy,'+v'))); imy.anti = false;
+ipz = unitize(rgapoint(commutate(L,fpz,'+v'))); ipz.anti = false;
+imz = unitize(rgapoint(commutate(L,fmz,'+v'))); imz.anti = false;
 
 %% Plot line using intersection points
-if ipx.m(5)==1, plot3(ipx.m(2),ipx.m(3),ipx.m(4),'r+'), end
-if imx.m(5)==1, plot3(imx.m(2),imx.m(3),imx.m(4),'ro'), end
-if ipy.m(5)==1, plot3(ipy.m(2),ipy.m(3),ipy.m(4),'k+'), end
-if imy.m(5)==1, plot3(imy.m(2),imy.m(3),imy.m(4),'ko'), end
-if ipz.m(5)==1, plot3(ipz.m(2),ipz.m(3),ipz.m(4),'b+'), end
-if imz.m(5)==1, plot3(imz.m(2),imz.m(3),imz.m(4),'bo'), end
+% weight = 1e4 if intersection found, otherwise point is at infinity
+if weight(ipx)==rga('e4'), plot3(ipx.m(2),ipx.m(3),ipx.m(4),'r+'), end
+if weight(imx)==rga('e4'), plot3(imx.m(2),imx.m(3),imx.m(4),'ro'), end
+if weight(ipy)==rga('e4'), plot3(ipy.m(2),ipy.m(3),ipy.m(4),'k+'), end
+if weight(imy)==rga('e4'), plot3(imy.m(2),imy.m(3),imy.m(4),'ko'), end
+if weight(ipz)==rga('e4'), plot3(ipz.m(2),ipz.m(3),ipz.m(4),'b+'), end
+if weight(imz)==rga('e4'), plot3(imz.m(2),imz.m(3),imz.m(4),'bo'), end
 
 %% Solving a Generalized Wahba Problem in RGA
 % Given a set of corresponding RGA objects, find the motor that relates
