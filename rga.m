@@ -354,7 +354,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
         function obj = dot(a,b)
             %DOT RGA dot product
             % If at least one input uses the anti basis, output will too.
-            M = diag([1 1 1 1 0 -1 -1 -1 0 0 0 -1 0 0 0 0]);
+            M = diag([1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0]);
             arga = isa(a,"rga");
             if nargin == 1 && arga
                 obj = a.m(:)'*M;
@@ -375,7 +375,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
         function obj = antidot(a,b)
             %ANTIDOT RGA anti-dot product
             % If at least one input uses the anti basis, output will too.
-            M = diag(fliplr([1 1 1 1 0 -1 -1 -1 0 0 0 -1 0 0 0 0]));
+            M = diag(fliplr([1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0]));
             arga = isa(a,"rga");
             if nargin == 1 && arga
                 obj = a.m(:)'*M;
