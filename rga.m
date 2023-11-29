@@ -601,10 +601,10 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             end
             switch type
                 case "bulk"
-                    n2 = dot(obj,rev(obj));
+                    n2 = dot(obj,obj);
                     n = sqrt(n2.m(1));
                 case "weight"
-                    n2 = antidot(obj,antirev(obj));
+                    n2 = antidot(obj,obj);
                     n = sqrt(n2.m(end));
                 case "geom"
                     n = norm(obj,"bulk") + norm(obj,"weight");
