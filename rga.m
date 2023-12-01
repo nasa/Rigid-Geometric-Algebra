@@ -19,8 +19,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             %   obj = rga('e0') or rga("e0") etc. also recognized for single elements
             %   Dual basis input e.g. 'eps0' etc. also works and creates e1234, etc.
             %   To create objects like 5e0 - 3e12 etc. first create a set
-            %   of basis elements using RGA.BASES (but not for symbolic
-            %   coefficients - use symbolic array syntax as above).
+            %   of basis elements using RGA.BASES.
             if nargin == 0
                 obj.m = randn(1,16);
             elseif ischar(v) || isstring(v)
