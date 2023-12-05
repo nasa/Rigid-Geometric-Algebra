@@ -10,6 +10,18 @@ There is a tutorial script and a demo script.  Both of these will be best utiliz
 # Applications
 One application is included, in the script wahba.m.  This implements the pose solution of a generalized version of Wahba's Problem, using Lengyal's conventions and the null-space method of Perwass, as well as a two-step method inspired by a classic paper by Walker, Shao, and Volz that used dual quaternions.  The demo script illustrates this application at the end.
 
+# State of This Project
+This project was undertaken in the "spare time" of the original developer, motivated solely by academic interest.  As of the initial public release, it does not purport to be a complete and error-free implementation of Lengyal's methods.  As such it is provided "as is" without any warranty, express, or implied.  As a recipient, you acknowledge that you waive any claims against, and indemnify and holds harmless, NASA and its contractors and subcontractors.  The NASA civil service technical point of contact for this project (who is the original developer), is
+
+J. Russell Carpenter
+Russell.Carpenter@nasa.gov
+NASA Goddard Space Flight Center Space Science Mission Operations
+
+Also, in the Fall of 2023 Lengyal began making several changes to the online resources that formed the reference material for this implementation (https://rigidgeometricalgebra.org/), which for example changed the definition of the dot and anti-dot products relative to prior material, among other changes. Minimal effort has been made to ensure all of these changes have been properly incorporated.
+
+# How to Contribute
+This project is open to collaborations. If you find this repository useful, even a little, please fork or star the repository! It provides positive feedback to the developer as well as helpful analytics data to the platform maintainers. 
+
 # References
 If Geometric Algebra is new to you, there are some great resources online, and a number of textbooks. A few suggestions:
 
