@@ -265,6 +265,7 @@ classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
             % Common ones hardcoded here; less common ones
             % computed on the fly via createprodmat
             I = eye(3); J = fliplr(I);
+            skew = @(x) [0,-x(3),x(2);x(3),0,-x(1);-x(2),x(1),0];
             weks = @(x) fliplr(skew(x));
             s = obj.m(1);
             v3 = obj.m(2:4); v3f = flipud(v3(:)); v4 = obj.m(5);
