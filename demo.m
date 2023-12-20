@@ -60,12 +60,17 @@ Q3 = unitize(Q1)
 
 %% Symbolic RGA objects
 % RGA objects support most symbolic operations
-syms a0 a1 a2 a3 a23 a31 a12 a321 b0 b1 b2 b3 b23 b31 b12 b321 real
-syms a4 a43 a42 a41 a412 a431 a423 a1234 b4 b43 b42 b41 b412 b431 b423 b1234 real
-M6 = rga([a0 a1 a2 a3 a4 a23 a31 a12 a43 a42 a41 a321 a412 a431 a423 a1234])
-M7 = rga([b0 b1 b2 b3 b4 b23 b31 b12 b43 b42 b41 b321 b412 b431 b423 b1234])
-P4 = rgapoint(a1,a2,a3,a4)
-P5 = rgapoint(b1,b2,b3,b4)
+if license('test','Symbolic_Toolbox')
+    syms a0 a1 a2 a3 a23 a31 a12 a321 b0 b1 b2 b3 b23 b31 b12 b321 real
+    syms a4 a43 a42 a41 a412 a431 a423 a1234 b4 b43 b42 b41 b412 b431 b423 b1234 real
+    M6 = rga([a0 a1 a2 a3 a4 a23 a31 a12 a43 a42 a41 a321 a412 a431 a423 a1234])
+    M7 = rga([b0 b1 b2 b3 b4 b23 b31 b12 b43 b42 b41 b321 b412 b431 b423 b1234])
+    P4 = rgapoint(a1,a2,a3,a4)
+    P5 = rgapoint(b1,b2,b3,b4)
+else % these will get used later
+    P4 = rgapoint;
+    P5 = rgapoint;
+end
 
 %% Using products
 % Products include dot, antidot, wedge, antiwedge, wedgedot, and
