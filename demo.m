@@ -68,6 +68,7 @@ if license('test','Symbolic_Toolbox')
     P4 = rgapoint(a1,a2,a3,a4)
     P5 = rgapoint(b1,b2,b3,b4)
 else % these will get used later
+    M6 = rga;
     P4 = rgapoint;
     P5 = rgapoint;
 end
