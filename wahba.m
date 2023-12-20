@@ -128,6 +128,7 @@ arguments
     m (1,16)
 end
 I = eye(3); J = fliplr(I);
+skew = @(x) [0,-x(3),x(2);x(3),0,-x(1);-x(2),x(1),0];
 weks = @(x) fliplr(skew(x));
 s = m(1);
 v3 = m(2:4); v3f = flipud(v3(:)); v4 = m(5);
@@ -167,6 +168,7 @@ if ~tilde
     m = diag([1 -ones(1,10), ones(1,5)])*m';
 end
 I = eye(3); J = fliplr(I);
+skew = @(x) [0,-x(3),x(2);x(3),0,-x(1);-x(2),x(1),0];
 weks = @(x) fliplr(skew(x));
 s = m(1);
 v3 = m(2:4); v3f = flipud(v3(:)); v4 = m(5);

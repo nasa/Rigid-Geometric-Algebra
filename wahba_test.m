@@ -101,3 +101,8 @@ end
 function a2 = reject(a,b)
 a2 = a - dot(a,b)/dot(b,b)*b;
 end
+
+function [u,l] = unit(v)
+l = sqrt(sum(v.^2));
+u = bsxfun(@times,v,1./l);
+end
