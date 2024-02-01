@@ -1,6 +1,10 @@
 # Rigid Geometric Algebra
 A collection of Matlab classes implementing the Geometric Algebra G(3,0,1) for homogeneous transformations of 3D rigid bodies in 4D projective space, primarily based on Lengyel's convention.
 
+Copyright © 2023 United States Government as represented by the Administrator of the National Aeronautics and Space Administration. No copyright is claimed in the United States under Title 17, U.S. Code. All Other Rights Reserved.
+
+Released under the NASA Open Source Agreement Version 3.1; refer to the included file NOSA GSC-19268-1.pdf for details.
+
 # Motivation
 There are many tremendous existing resources providing various implementations of Geometric Algebra.  One of the early ones, GABLE, was started in Matlab but moved on to C++ and Java. Another one that is still maintained is the Clifford Multivector Toolbox, which provides a really general set of capabilities.  There are many more.  What seems to be missing is a set of Matlab tools that implement Lengyel's conventions. Lengyel's approach highlights the concept of duality in Geometric Algebra in a manner somewhat differently than most others; some may find Lengyal's treatment to be more satisfying.  This set of classes is aimed for such users, who desire to work in a Matlab environment.
 
