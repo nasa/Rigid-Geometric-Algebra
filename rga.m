@@ -1,6 +1,6 @@
 classdef (InferiorClasses = {?sym}) rga < matlab.mixin.indexing.RedefinesDot
     % G(3,0,1) Geometric Algebra for homogeneous transformations of 3D
-    % rigid bodies in 4D projective space, primarily based on Lengyal's
+    % rigid bodies in 4D projective space, primarily based on Lengyel's
     % conventions:
     %    https://projectivegeometricalgebra.org/
     %    https://rigidgeometricalgebra.org/
