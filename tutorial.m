@@ -36,7 +36,7 @@ clear
 %% Conventions
 % As so often occurs, e.g. with the quaternions, a number of differing conventions 
 % have evolved that concern representations and interpretations of various Geometric 
-% Algebras.  This tutorial and the Matlab class it uses rely primarily on Lengyal's 
+% Algebras.  This tutorial and the Matlab class it uses rely primarily on Lengyel's 
 % conventions:
 % 
 % <https://projectivegeometricalgebra.org/ https://projectivegeometricalgebra.org/>
