@@ -1,4 +1,4 @@
-function Q = wahba(M,N,algorithm)
+function Q = wahba(M,N)
 %WAHBA Q = wahba(M,N) finds motor Q such that N = Q*M*~Q
 % M and N are corresonding arrays of multivectors containing any
 % combination of points, lines, planes, and/or motors.
@@ -6,117 +6,45 @@ function Q = wahba(M,N,algorithm)
 % planes, all points, etc. then M & N can be ordinary arrays.  If there are
 % mixed types within M & N, then M & N must be cell arrays.
 % This function requires the rga class.
-% Q = wahba(M,N,algorithm) allows a choice of solution method.
-% If algorithm = 'one-step' wahba uses the approach described by
-% Perwass, C., Geometric Algebra with Applications in Engineering,
-% Springer, 2010.  This is the default.
-% Otherwise, it uses a two-step approach that first solves for the
-% rotational part of the motor, then "completes the screw" to solve for the
-% translational part.  This was loosely inspired by
-% Walker, Shao, and Volz, "Estimating 3-D Location Parameters Using Dual
-% Number Quaternions," CVGIP: Image Understanding, 54(3) 358-367, 1991.
 
 if nargin < 1
     wahba_test
     return
 end
 lenM = length(M);
-if nargin < 3
-    algorithm = 'one-step';
+C = 0; Cw = 0;
+for i = 1:lenM
+    B = Psi(N{i}.m) - Xi(M{i}.m);
+    Bw = Psi(weight(N{i}).m) - Xi(weight(M{i}).m);
+    C = C + B'*B;
+    Cw = Cw + Bw'*Bw;
 end
 
-switch algorithm
-    case 'one-step'
-        %% Null-space approach
-        % Solve for motor in one step, as in Perwass p.266
-        H([1 6:11 16],:) = eye(8);
-        C = 0;
-        for i = 1:lenM
-            %C = C + Xi(M{i}.m) - Psi(N{i}.m);
-            B = Xi(M{i}.m) - Psi(N{i}.m);
-            C = C + B'*B;
-        end
-        A = C*H;
-        [~,S,V] = svd(A,'vector');
-        tol = max(size(A))*eps(norm(A));
-        k = find(S<tol);
-        if isempty(k)
-            if any(abs(diff(S))<tol) % check for repeats
-                k = 7:8; % min pair since svd returns in decreasing order
-            else
-                k = 8; % no repeats so just one min that will be last
-            end
-        end
-        lenk = length(k);
-        if lenk > 1
-            warning('Null space of Xi(M)-Psi(N) spans more than one motor')
-        end
-        %[~,k] = min(S); % not needed; svd returns them in decreasing order
-        for j = lenk:-1:1
-            Qsvd(j) = rgamotor(rga(H*V(:,k(j)),true));
-            wtnormQ(j) = norm(Qsvd(j),'weight');
-        end
-        %Qsvd = unitize(rgamotor(rga(H*V(:,k),true))) if we unitize it, it's no
-        %longer a null vector, so need to scale entire thing!
-        keep = (wtnormQ>tol);
-        Q = unitize(1/wtnormQ(keep)*Qsvd(keep));
-
-    otherwise
-        %% Transcribe multivectors to column vectors
-        for i = lenM:-1:1
-            if iscell(M)
-                Mi = M{i}; Ni = N{i};
-            else
-                Mi = M(i); Ni = N(i);
-            end
-            mw(:,i) = weight(Mi).m'; nw(:,i) = weight(Ni).m';
-            mb(:,i) = bulk(Mi).m'; nb(:,i) = bulk(Ni).m';
-        end
-        U = eye(16); U(2:11,2:11)=-eye(10); % anti-reverse
-
-        %% Solve for rotational part of motor
-        C = 0;
-        for i = 1:lenM
-            C = C + Psi(nw(:,i))'*Xi(mw(:,i));
-        end
-        C = (C+C')/2;
-        Hw(16,4) = 1; Hw(11:-1:9,1:3) = eye(3);
-        [V,e] = eig(Hw'*C*Hw,'vector');
-        V = real(V); e = real(e);
-        V(abs(V)<1e4*eps) = 0;
-        if all(all(abs(V-eye(4)) < 1e4*eps))
-            qw(16,1) = 1;
-            warning('Identity rotation found; possibly due to poor observability')
-        else
-            [~,k] = sort(e,'descend');
-            if abs(e(k(1))-e(k(2))) < 10*eps(e(k(1)))
-                warning('Repeated eigenvalues in rotational solution')
-            end
-            qw = Hw*V(:,k(1));
-        end
-
-        %% Solve for remaining part of motor
-        C = 0;
-        d = 0;
-        for i = 1:lenM
-            C = C + (Xi(qw)'*Xi(mw(:,i)) + Psi(qw)*Psi(mw(:,i))*U);
-            d = d + nb(:,i) - Xi(qw)'*Psi(qw)*mb(:,i);
-        end
-        Hb(16,4) = 0; Hb([6:8 1],:) = eye(4); % s = Hb'*qb
-
-        Chat = C*Hb;
-        qwhat = Hw'*qw;
-        A = [Chat'*Chat; qwhat'];
-        rnk = rank(A);
-        if rnk < 4
-            warning(['Translational solution may be inaccurate; rank = ',...
-                num2str(rnk), ' vs. 4 needed'])
-        end
-        qb = Hb*(A\[Chat'*d; 0]);
-
-        %% Create output motor
-        Q = unitize(rgamotor(qw([11 10 9 16]),qb([6:8 1])));
+%% Solve for rotational part of motor
+Hw(16,4) = 1; Hw(11:-1:9,1:3) = eye(3);
+Aw = Hw'*Cw*Hw;
+[~,Sw,Vw] = svd(Aw,'vector');
+tol = max(size(Aw))*eps(norm(Aw));
+k = find(Sw<tol);
+if length(k) > 1
+     warning('Rotational solution may be inaccurate')
 end
+qw = Hw*Vw(:,end); % min since svd returns in decreasing order
+if qw(end)<0
+    qw = -qw; % conventional to make scalar part positive
+end
+
+%% Solve for remaining part of motor
+Hb(16,4) = 0; Hb([6:8 1],:) = eye(4); % s = Hb'*qb
+Cb = C*Hb;
+qwhat = Hw'*qw;
+A = [Cb'*Cb qwhat; qwhat' 0];
+d = [-Hb'*C'*C*Hw*qwhat; 0];
+x = A\d;
+qb = Hb*x(1:4);
+
+%% Create output motor
+Q = unitize(rgamotor(qw([11 10 9 16]),qb([6:8 1])));
 end
 
 %% Helper functions
