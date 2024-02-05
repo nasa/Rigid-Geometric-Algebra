@@ -36,10 +36,12 @@ end
 
 %% Solve for remaining part of motor
 Hb(16,4) = 0; Hb([6:8 1],:) = eye(4); % s = Hb'*qb
-Cb = C*Hb;
+%Cb = C*Hb;
 qwhat = Hw'*qw;
-A = [Cb'*Cb qwhat; qwhat' 0];
-d = [-Hb'*C'*C*Hw*qwhat; 0];
+A = [Hb'*C*Hb qwhat; qwhat' 0];
+d = [-Hb'*C*Hw*qwhat; 0];
+%A = [Cb'*Cb qwhat; qwhat' 0];
+%d = [-Hb'*C'*C*Hw*qwhat; 0];
 x = A\d;
 qb = Hb*x(1:4);
 
