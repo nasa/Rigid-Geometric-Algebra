@@ -1,4 +1,4 @@
-function wahba_test(opts)
+function [M,N,Qtru,Qest] = wahba_test(opts)
 %% Test Wahba
 arguments
     opts.points (1,1) double = 1

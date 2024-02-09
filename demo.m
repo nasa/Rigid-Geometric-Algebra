@@ -191,13 +191,13 @@ if weight(imz)==rga('e4'), plot3(imz.m(2),imz.m(3),imz.m(4),'co'), end
 % For Wahba's original problem (rotation only), there will be a pair of
 % equal solutions, one of which incorrectly assigns the rotation to the
 % bulk in instead of the weight of the motor.
-wahba_test % default test case with each type noise-free observation
-wahba_test(points=1,planes=2,directions=0,lines=0,motors=0) % still noise-free
+wahba_test; % default test case with each type noise-free observation
+wahba_test(points=1,planes=2,directions=0,lines=0,motors=0); % still noise-free
 wahba_test(points=1,planes=2,directions=0,lines=0,motors=0,...
-    point_sigma=0.1,plane_sigma=0.1) % add some noise w/specified sigmas
-wahba_test(points=0,planes=0,directions=2,lines=0,motors=0,fullpose=false) % original Wahba
+    point_sigma=0.1,plane_sigma=0.1); % add some noise w/specified sigmas
+wahba_test(points=0,planes=0,directions=2,lines=0,motors=0,fullpose=false); % original Wahba
 wahba_test(points=0,planes=0,directions=2,lines=0,motors=0,fullpose=false,...
-    direction_sigma=0.1) % original Wahba w/noise
+    direction_sigma=0.1); % original Wahba w/noise
 
 %% Display basis element product tables
 % Each cell in the interior of a table shows the application of the
