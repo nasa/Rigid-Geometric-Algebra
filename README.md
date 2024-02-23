@@ -7,6 +7,8 @@ Released under the NASA Open Source Agreement Version 3.1; refer to the included
 
 [![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=nasa/Rigid-Geometric-Algebra)
 
+(Note that, as of early 2024, you do not need a Matlab license to run these tools in Matlab Online.)
+
 # Motivation
 There are many tremendous existing resources providing various implementations of Geometric Algebra.  One of the early ones, GABLE, was started in Matlab but moved on to C++ and Java. Another one that is still maintained is the Clifford Multivector Toolbox, which provides a really general set of capabilities.  There are many more.  What seems to be missing is a set of Matlab tools that implement Lengyel's conventions. Lengyel's approach highlights the concept of duality in Geometric Algebra in a manner somewhat differently than most others; some may find Lengyal's treatment to be more satisfying.  This set of classes is aimed for such users, who desire to work in a Matlab environment.
 
